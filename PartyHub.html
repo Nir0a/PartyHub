@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <title>PartyHub</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --orange: #ff9000;
+      --orange-light: #ffbd62;
+      --white: #fff;
+      --muted: #aaa;
+      --panel: rgb(255 255 255 / 4%);
+      --line: rgb(255 255 255 / 10%);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      min-height: 100%;
+      background: #000;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 50% 45%, rgb(255 144 0 / 10%), transparent 68%),
+        #000;
+      color: var(--white);
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    .app-header {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      width: min(1200px, 100%);
+      min-height: 66px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 auto;
+      padding: 18px 24px 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--white);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -1.2px;
+      cursor: pointer;
+    }
+
+    .brand span {
+      color: var(--orange);
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 2px solid var(--orange);
+      border-radius: 9px;
+      color: var(--orange);
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .back-button {
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 3%);
+      color: #ddd;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      border-color: rgb(255 144 0 / 60%);
+      color: var(--white);
+    }
+
+    .player-badges {
+      display: flex;
+      max-width: 58%;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .player-badge {
+      display: grid;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+      place-items: center;
+      border: 1px solid rgb(255 144 0 / 65%);
+      border-radius: 50%;
+      background: rgb(255 144 0 / 16%);
+      color: var(--orange-light);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .player-badge.is-active {
+      border-color: var(--orange);
+      background: var(--orange);
+      color: #17110a;
+      box-shadow: 0 0 22px rgb(255 144 0 / 35%);
+    }
+
+    .view {
+      display: none;
+      width: 100%;
+      min-height: calc(100vh - 66px);
+      min-height: calc(100svh - 66px);
+      animation: arrive 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .view.is-active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes arrive {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .home-view {
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .home-hero {
+      width: min(760px, 100%);
+      margin: auto;
+      padding: 24px 0 54px;
+    }
+
+    .home-hero h1 {
+      margin: 0;
+      font-size: clamp(48px, 9vw, 82px);
+      font-weight: 900;
+      letter-spacing: -5px;
+      line-height: 0.98;
+    }
+
+    .home-hero h1 span,
+    .orange {
+      color: var(--orange);
+    }
+
+    .home-hero p {
+      max-width: 500px;
+      margin: 22px auto 30px;
+      color: var(--muted);
+      font-size: clamp(16px, 2.5vw, 19px);
+      line-height: 1.6;
+    }
+
+    .eyebrow {
+      margin: 0 0 9px;
+      color: var(--orange);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .quiet-button,
+    .danger-button {
+      display: inline-flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 24px;
+      border: 1px solid transparent;
+      border-radius: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 150ms ease, filter 150ms ease, border-color 150ms ease, background 150ms ease;
+    }
+
+    .primary-button {
+      min-height: 62px;
+      padding: 0 32px;
+      border-color: #ffad35;
+      background: linear-gradient(135deg, #ffae35, var(--orange) 58%, #e87500);
+      box-shadow: 0 10px 30px rgb(255 144 0 / 26%);
+      color: #17110a;
+      font-size: 17px;
+    }
+
+    .secondary-button {
+      border-color: rgb(255 144 0 / 45%);
+      background: rgb(255 144 0 / 12%);
+      color: var(--white);
+    }
+
+    .quiet-button {
+      border-color: var(--line);
+      background: rgb(255 255 255 / 4%);
+      color: #eee;
+    }
+
+    .danger-button {
+      min-width: 38px;
+      min-height: 38px;
+      padding: 0;
+      border-color: rgb(255 255 255 / 12%);
+      background: rgb(255 255 255 / 5%);
+      color: #ddd;
+      font-size: 20px;
+    }
+
+    .primary-button:hover,
+    .secondary-button:hover,
+    .quiet-button:hover,
+    .danger-button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .content-main {
+      width: min(760px, calc(100% - 32px));
+      margin: auto;
+      padding: 30px 0 54px;
+    }
+
+    .page-heading {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      font-size: clamp(34px, 6vw, 54px);
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+
+    .page-description {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .player-form {
+      display: flex;
+      gap: 10px;
+    }
+
+    .player-input,
+    .setting-select {
+      min-width: 0;
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgb(255 255 255 / 5%);
+      color: var(--white);
+    }
+
+    .player-input {
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    .player-input::placeholder {
+      color: #888;
+    }
+
+    .player-list {
+      display: grid;
+      gap: 9px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .player-item {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 8px 7px 16px;
+      border: 1px solid rgb(255 144 0 / 20%);
+      border-radius: 14px;
+      background: linear-gradient(120deg, rgb(255 144 0 / 8%), rgb(255 255 255 / 3%));
+      font-weight: 700;
+    }
+
+    .player-count,
+    .form-message {
+      min-height: 20px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .player-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .player-actions .primary-button {
+      width: min(100%, 420px);
+    }
+
+    .hub-view {
+      justify-content: center;
+      padding: 28px 16px 42px;
+    }
+
+    .hub-inner {
+      width: min(1120px, 100%);
+      margin: auto;
+      text-align: center;
+    }
+
+    .hub-heading h1 {
+      margin: 0;
+      font-size: clamp(36px, 6vw, 58px);
+      font-weight: 900;
+      letter-spacing: -2px;
+    }
+
+    .hub-heading p {
+      margin: 12px 0 30px;
+      color: var(--muted);
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .game-card {
+      display: flex;
+      min-height: 230px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      border: 1px solid rgb(255 144 0 / 26%);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgb(255 144 0 / 10%), rgb(255 255 255 / 3%));
+      box-shadow: 0 16px 46px rgb(0 0 0 / 28%);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .game-card:hover {
+      border-color: rgb(255 144 0 / 75%);
+      background: linear-gradient(145deg, rgb(255 144 0 / 18%), rgb(255 255 255 / 5%));
+    }
+
+    .game-icon {
+      display: grid;
+      width: 58px;
+      height: 58px;
+      place-items: center;
+      margin-bottom: 18px;
+      border: 1px solid rgb(255 144 0 / 38%);
+      border-radius: 18px;
+      background: rgb(255 144 0 / 13%);
+      color: var(--orange);
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .game-card h2 {
+      margin: 0;
+      font-size: clamp(17px, 2.4vw, 22px);
+    }
+
+    .game-card p {
+      margin: 8px 0 0;
+      color: #999;
+      font-size: 13px;
+    }
+
+    .settings-card {
+      overflow: hidden;
+      border: 1px solid rgb(255 144 0 / 24%);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgb(255 144 0 / 7%), rgb(255 255 255 / 3%));
+      box-shadow: 0 20px 60px rgb(0 0 0 / 28%);
+    }
+
+    .settings-section {
+      padding: 22px;
+    }
+
+    .settings-section + .settings-section {
+      border-top: 1px solid rgb(255 255 255 / 7%);
+    }
+
+    .section-heading {
+      margin: 0 0 15px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .topic-option {
+      display: flex;
+      min-height: 50px;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel);
+      color: #eee;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .topic-option:has(input:checked) {
+      border-color: rgb(255 144 0 / 55%);
+      background: rgb(255 144 0 / 9%);
+    }
+
+    .topic-option input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      margin: 0;
+      accent-color: var(--orange);
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+      border-top: 1px solid rgb(255 255 255 / 7%);
+    }
+
+    .setting-row:first-of-type {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .setting-copy {
+      display: grid;
+      gap: 5px;
+    }
+
+    .setting-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .setting-description {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .setting-select {
+      min-height: 42px;
+      padding: 0 10px;
+    }
+
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .switch-track {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgb(255 255 255 / 16%);
+      border-radius: 999px;
+      background: #333;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+
+    .switch-track::before {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ddd;
+      content: "";
+      transition: transform 150ms ease, background 150ms ease;
+    }
+
+    .switch input:checked + .switch-track {
+      background: var(--orange);
+    }
+
+    .switch input:checked + .switch-track::before {
+      background: #17110a;
+      transform: translateX(20px);
+    }
+
+    .settings-actions {
+      display: grid;
+      justify-items: center;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .settings-actions .primary-button {
+      width: min(100%, 420px);
+      min-height: 68px;
+      border-radius: 999px;
+      font-size: 20px;
+    }
+
+    .settings-error {
+      min-height: 18px;
+      margin: 0;
+      color: #ffc16b;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .game-view {
+      position: relative;
+      min-height: calc(100vh - 66px);
+      min-height: calc(100svh - 66px);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .game-shell {
+      width: min(520px, 100%);
+      margin: auto;
+    }
+
+    .game-meta {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .round-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .active-player {
+      margin-top: 4px;
+      color: var(--orange);
+      font-size: clamp(30px, 8vw, 42px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+      text-shadow: 0 0 28px rgb(255 144 0 / 24%);
+    }
+
+    .game-kind {
+      flex: 0 0 auto;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 5%);
+      color: #ddd;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .deck-wrap {
+      position: relative;
+      height: min(58vh, 590px);
+      min-height: 390px;
+      isolation: isolate;
+    }
+
+    .deck-wrap::after {
+      position: absolute;
+      z-index: -1;
+      inset: 12% 10% 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgb(255 144 0 / 12%), transparent 68%);
+      content: "";
+      filter: blur(25px);
+    }
+
+    .deck-back {
+      position: absolute;
+      inset: 10px 12px 0;
+      border: 1px solid rgb(255 144 0 / 14%);
+      border-radius: 28px;
+      background: #3a260f;
+      opacity: 0.55;
+      transform: rotate(-2.5deg);
+    }
+
+    .deck-back.two {
+      inset: 5px 6px 0;
+      background: #242019;
+      opacity: 0.85;
+      transform: rotate(1.7deg);
+    }
+
+    .main-card {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 22px;
+      border: 1px solid rgb(255 255 255 / 8%);
+      border-radius: 28px;
+      background: linear-gradient(160deg, #35240f, #17130e);
+      box-shadow: 0 28px 70px rgb(0 0 0 / 35%);
+    }
+
+    .main-card.is-dare {
+      background: linear-gradient(155deg, #42270d, #17130e 75%);
+    }
+
+    .card-shine {
+      position: absolute;
+      z-index: 0;
+      inset: -40%;
+      background: radial-gradient(circle at 20% 20%, rgb(255 255 255 / 12%), transparent 22%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .card-top,
+    .card-center,
+    .card-bottom {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-badge {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      padding: 8px 12px;
+      border: 1px solid rgb(255 255 255 / 8%);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 6%);
+      color: #f1f1f4;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .category-label {
+      color: var(--orange-light);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .card-center {
+      padding: 18px 4px;
+      text-align: center;
+    }
+
+    .card-player {
+      margin: 0 0 12px;
+      color: var(--orange);
+      font-size: clamp(34px, 9vw, 48px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+      text-shadow: 0 0 28px rgb(255 144 0 / 24%);
+    }
+
+    .card-prompt {
+      max-width: 420px;
+      margin: 0 auto;
+      color: #f8f8fb;
+      font-size: clamp(22px, 5.8vw, 31px);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.27;
+      overflow-wrap: anywhere;
+    }
+
+    .prompt-player-name {
+      color: var(--orange);
+    }
+
+    .turn-note {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: var(--orange-light);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .chooser {
+      margin-bottom: 10px;
+      color: #bbb;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .button-row .primary-button,
+    .button-row .secondary-button,
+    .button-row .quiet-button {
+      width: 100%;
+      min-height: 52px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .primary-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .single-action {
+      width: 100%;
+    }
+
+    .single-action .primary-button,
+    .single-action .secondary-button,
+    .single-action .quiet-button {
+      width: 100%;
+    }
+
+    .error-message {
+      padding: 14px 16px;
+      border: 1px solid rgb(255 144 0 / 30%);
+      border-radius: 12px;
+      background: rgb(255 144 0 / 8%);
+      color: #ffd7a3;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      padding: 0 20px 20px;
+      color: #666;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 700px) {
+      .app-header {
+        padding: 12px 16px 0;
+      }
+
+      .game-grid {
+        max-width: 440px;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin: 0 auto;
+      }
+
+      .game-card {
+        min-height: 140px;
+        padding: 18px;
+      }
+
+      .game-icon {
+        width: 46px;
+        height: 46px;
+        margin-bottom: 10px;
+        border-radius: 14px;
+        font-size: 23px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .brand {
+        font-size: 21px;
+      }
+
+      .player-badges {
+        max-width: 60%;
+        gap: 6px;
+      }
+
+      .player-badge {
+        width: 34px;
+        height: 34px;
+        font-size: 11px;
+      }
+
+      .content-main {
+        padding: 20px 0 36px;
+      }
+
+      .page-heading {
+        margin-bottom: 22px;
+      }
+
+      .settings-section {
+        padding: 18px 15px;
+      }
+
+      .topic-grid {
+        gap: 8px;
+      }
+
+      .topic-option {
+        padding: 9px;
+        font-size: 12px;
+      }
+
+      .setting-row {
+        gap: 10px;
+      }
+
+      .setting-description {
+        max-width: 245px;
+      }
+
+      .setting-select {
+        max-width: 145px;
+        font-size: 12px;
+      }
+
+      .game-view {
+        padding: 8px 16px 14px;
+      }
+
+      .deck-wrap {
+        height: min(58vh, 520px);
+        min-height: 370px;
+      }
+
+      .main-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .button-row {
+        gap: 8px;
+      }
+
+      .button-row .primary-button,
+      .button-row .secondary-button,
+      .button-row .quiet-button {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .home-hero h1 {
+        letter-spacing: -3px;
+      }
+
+      .player-form {
+        flex-direction: column;
+      }
+
+      .player-form .secondary-button {
+        width: 100%;
+      }
+
+      .topic-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .setting-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .setting-row .switch,
+      .setting-row .setting-select {
+        align-self: flex-end;
+      }
+
+      .deck-wrap {
+        min-height: 350px;
+      }
+
+      .main-card {
+        padding: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <button class="brand" type="button" data-action="home" aria-label="Zur PartyHub-Startseite">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <span style="color:#fff">Party<span>Hub</span></span>
+    </button>
+    <ul class="player-badges" id="header-players" aria-label="Spieler"></ul>
+    <button class="back-button" id="back-button" type="button" data-action="back" hidden>← Zurück</button>
+  </header>
+
+  <main id="app">
+    <section class="view home-view is-active" data-view="home">
+      <div class="home-hero">
+        <p class="eyebrow">Dein Hub für gute Abende</p>
+        <h1>Freunde da.<br><span>Party an.</span></h1>
+        <p>Mach PartyHub zum Mittelpunkt eures nächsten Spieleabends.</p>
+        <button class="primary-button" type="button" data-action="start">Spiel starten <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <section class="view" data-view="players">
+      <main class="content-main">
+        <header class="page-heading">
+          <p class="eyebrow">PartyHub</p>
+          <h1>Spieler</h1>
+          <p class="page-description">Fügt eure Namen hinzu und macht euch bereit!</p>
+        </header>
+        <form class="player-form" id="player-form">
+          <input class="player-input" id="player-name" type="text" maxlength="30" autocomplete="off" placeholder="Spielername eingeben" aria-label="Spielername" required>
+          <button class="secondary-button" type="submit">Hinzufügen</button>
+        </form>
+        <ul class="player-list" id="player-list" aria-label="Hinzugefügte Spieler"></ul>
+        <p class="player-count" id="player-count" aria-live="polite"></p>
+        <div class="player-actions">
+          <button class="primary-button" id="players-continue" type="button" data-action="hub" hidden>Weiter zum Hub <span aria-hidden="true">→</span></button>
+        </div>
+      </main>
+    </section>
+
+    <section class="view hub-view" data-view="hub">
+      <div class="hub-inner">
+        <header class="hub-heading">
+          <p class="eyebrow">PartyHub</p>
+          <h1>Wählt euer <span class="orange">Minigame</span></h1>
+          <p>Wer ist bereit für die nächste Runde?</p>
+        </header>
+        <div class="game-grid">
+          <button class="game-card" type="button" data-action="settings" data-game="wop">
+            <span class="game-icon" aria-hidden="true">?</span>
+            <h2>Wahrheit oder Pflicht</h2>
+            <p>Wahrheiten, Aufgaben und Kategorien</p>
+          </button>
+          <button class="game-card" type="button" data-action="settings" data-game="wwe">
+            <span class="game-icon" aria-hidden="true">↑</span>
+            <h2>Wer würde eher?</h2>
+            <p>Kategorien auswählen und spielen</p>
+          </button>
+          <button class="game-card" type="button" data-action="settings" data-game="drink">
+            <span class="game-icon" aria-hidden="true">◒</span>
+            <h2>Trink-Spiel</h2>
+            <p>„Trink wenn“-Aussagen aus euren Themen</p>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="settings">
+      <main class="content-main">
+        <header class="page-heading">
+          <p class="eyebrow">Spiel-Einstellungen</p>
+          <h1 id="settings-title"></h1>
+          <p class="page-description" id="settings-description"></p>
+        </header>
+        <form class="settings-card" id="settings-form"></form>
+        <div class="settings-actions">
+          <button class="primary-button" type="button" data-action="begin-game">Spiel Beginnen</button>
+          <p class="settings-error" id="settings-error" aria-live="polite"></p>
+        </div>
+      </main>
+    </section>
+
+    <section class="view game-view" data-view="game">
+      <main class="game-shell">
+        <div class="game-meta" id="game-meta"></div>
+        <p class="error-message" id="game-error" role="alert" hidden></p>
+        <div class="deck-wrap" id="deck-wrap">
+          <div class="deck-back" aria-hidden="true"></div>
+          <div class="deck-back two" aria-hidden="true"></div>
+          <article class="main-card" id="main-card" aria-label="Spielkarte">
+            <div class="card-shine" aria-hidden="true"></div>
+            <div class="card-top">
+              <span class="card-badge" id="card-badge"></span>
+              <span class="category-label" id="category-label"></span>
+            </div>
+            <div class="card-center" aria-live="polite">
+              <div class="card-player" id="card-player"></div>
+              <p class="card-prompt" id="card-prompt"></p>
+            </div>
+            <div class="card-bottom" id="card-actions"></div>
+          </article>
+        </div>
+        <p class="turn-note" id="turn-note" aria-live="polite"></p>
+      </main>
+    </section>
+  </main>
+
+  <footer class="footer-note" id="footer-note">Zusammen spielen. Zusammen feiern.</footer>
+
+  <script>
+    (() => {
+      const categoryNames = {
+        alltag: "Alltag",
+        lustig: "Lustig",
+        deep: "Deep",
+        "deep-extrem": "Deep Extrem",
+        freaky: "Freaky",
+        "extrem-freaky": "Extrem freaky"
+      };
+
+      const wopThemes = {
+        "alltag": {
+                "truths": [
+                        "Welche kleine Alltagssache schiebst du am liebsten auf?",
+                        "Was war dein letzter unnötiger Online-Kauf?",
+                        "Wann hast du zuletzt so getan, als hättest du eine Nachricht nicht gesehen?",
+                        "Welche Angewohnheit von {{randomPlayer}} findest du sympathisch?",
+                        "Was ist das Unordentlichste an deinem Zimmer oder deiner Wohnung?",
+                        "Welches Essen könntest du jeden Tag essen?",
+                        "Was war dein lustigster kleiner Fail diese Woche?",
+                        "Bei welcher alltäglichen Sache bist du überraschend schlecht?",
+                        "Welche App öffnest du morgens als Erstes?",
+                        "Was vergisst du am häufigsten einzukaufen?",
+                        "Welche Hausarbeit magst du am wenigsten?",
+                        "Wie lange snoozest du normalerweise?",
+                        "Was ist dein typisches Mittagessen?",
+                        "Welche Kleinigkeit macht deinen Morgen besser?",
+                        "Was liegt gerade am längsten auf deiner To-do-Liste?",
+                        "Welche Sache hast du zuletzt repariert statt neu gekauft?",
+                        "Was machst du immer erst kurz vor knapp?",
+                        "Welche Routine würdest du gern ändern?",
+                        "Welches Haushaltsgerät benutzt du am häufigsten?",
+                        "Wann bist du zuletzt zu spät gekommen?",
+                        "Was ist deine meistgenutzte Ausrede im Alltag?",
+                        "Welche Aufgabe erledigst du erstaunlich gern?",
+                        "Was ist dein Lieblingssnack für unterwegs?",
+                        "Welche Sache suchst du ständig?",
+                        "Wie sieht dein idealer freier Nachmittag aus?",
+                        "Welche alltägliche Ausgabe findest du unnötig teuer?",
+                        "Was war das letzte Neue, das du gelernt hast?",
+                        "Welche Sache würdest du gern besser organisieren?",
+                        "Was bestellst du am liebsten im Café?",
+                        "Welche Nachricht beantwortest du meistens sofort?",
+                        "Welche Nachricht lässt du oft unbeantwortet?",
+                        "Was war dein letzter kleiner Erfolg?",
+                        "Was darf in deinem Kühlschrank nie fehlen?",
+                        "Welche alltägliche Entscheidung fällt dir besonders schwer?",
+                        "Was ist dein bevorzugter Weg zur Entspannung?",
+                        "Welche Sache machst du lieber allein?",
+                        "Was würdest du an deinem Tagesablauf gern vereinfachen?",
+                        "Wofür gibst du im Alltag gern etwas mehr Geld aus?",
+                        "Was ist das Erste, das du nach Hause kommst tust?",
+                        "Welche Sache kannst du besser als die meisten erwarten?",
+                        "Was ist dein Standard-Frühstück?",
+                        "Welchen Gegenstand nimmst du immer mit?",
+                        "Was lässt dich im Alltag sofort lächeln?",
+                        "Welche Kleinigkeit bringt dich schnell aus der Ruhe?",
+                        "Wann hast du zuletzt etwas zum ersten Mal ausprobiert?",
+                        "Welche alltägliche Gewohnheit hast du von deiner Familie übernommen?",
+                        "Welchen Termin vergisst du am ehesten?",
+                        "Was würdest du gern öfter in deinen Alltag einbauen?",
+                        "Welche Aufgabe würdest du gern für immer abgeben?",
+                        "Welche einfache Sache möchtest du diese Woche erledigen?"
+                ],
+                "dares": [
+                        "Mach 15 Sekunden lang eine dramatische Werbung für einen Gegenstand im Raum.",
+                        "Lass {{randomPlayer}} ein Emoji aussuchen und stelle es pantomimisch dar.",
+                        "Erzähle die nächste Minute alles wie ein Sportkommentator.",
+                        "Erfinde einen neuen Namen für {{randomPlayer}} und erkläre ihn wie eine Preisverleihung.",
+                        "Summ ein Lied, bis jemand es errät.",
+                        "Mach eine Zeitlupen-Szene, in der du dich auf einen Stuhl setzt.",
+                        "Gib {{randomPlayer}} ein ehrliches, nettes Kompliment.",
+                        "Tanze 20 Sekunden zu einem Lied, das die Gruppe auswählt.",
+                        "Sortiere fünf Gegenstände im Raum nach deiner Lieblingsfarbe.",
+                        "Erkläre deinen heutigen Tagesablauf wie eine Wettervorhersage.",
+                        "Mache 10 Sekunden lang deine beste Morgenroutine pantomimisch.",
+                        "Nenne fünf Dinge, die man in einem Supermarkt kaufen kann.",
+                        "Gib einem Gegenstand im Raum eine Gebrauchsanleitung.",
+                        "Stelle deinen Lieblingssnack als Gourmetgericht vor.",
+                        "Lies eine beliebige Zeile wie eine Durchsage im Bahnhof vor.",
+                        "Mache eine Minute lang alles in Zeitlupe.",
+                        "Erfinde einen Namen für das heutige Wetter.",
+                        "Nenne drei Aufgaben, die du heute schon erledigt hast.",
+                        "Beschreibe dein Lieblingsgetränk, ohne seinen Namen zu sagen.",
+                        "Mache eine pantomimische Szene über das Aufräumen.",
+                        "Erzähle, wie du deinen Tag in drei Emojis zusammenfassen würdest.",
+                        "Stelle einen Wecker nach und spiele den Klingelton.",
+                        "Finde im Raum etwas Rundes und beschreibe es wie ein Kunstwerk.",
+                        "Mache zehn Kniebeugen oder wähle eine gleichwertige Bewegung im Sitzen.",
+                        "Erfinde einen Werbespruch für Wasser.",
+                        "Zähle rückwärts von 20, während du klatschst.",
+                        "Zeige deinen typischen Gesichtsausdruck, wenn du Hunger hast.",
+                        "Sage drei alltägliche Dinge mit einer Opernstimme.",
+                        "Führe eine dramatische Szene über einen leeren Kühlschrank auf.",
+                        "Mache eine Mini-Tour durch den Raum wie ein Immobilienprofi.",
+                        "Nenne fünf Dinge, die du in eine Tasche packen würdest.",
+                        "Erfinde ein neues Wort für den Moment, wenn der Kaffee fertig ist.",
+                        "Stelle pantomimisch dar, wie du deinen Schlüssel suchst.",
+                        "Erkläre {{randomPlayer}}, wie man ein perfektes Pausenbrot macht.",
+                        "Mache eine Einkaufsliste mit fünf lustigen Dingen.",
+                        "Sprich die nächste Antwort wie ein Navigationsgerät.",
+                        "Nenne drei Dinge, für die du heute dankbar bist.",
+                        "Erfinde eine kurze Hymne für deinen Lieblingsplatz.",
+                        "Mache eine Büroklammer oder einen Stift zum Star einer Modenschau.",
+                        "Beschreibe den Raum wie ein Reiseleiter.",
+                        "Tu so, als würdest du eine neue App für den Alltag präsentieren.",
+                        "Erfinde einen Tanz für das Fertigstellen einer Aufgabe.",
+                        "Sage den Namen von {{randomPlayer}} wie eine Preisverleihung.",
+                        "Stelle eine alltägliche Tätigkeit als Actionfilm-Szene dar.",
+                        "Fasse dein Lieblingsrezept in drei dramatischen Sätzen zusammen.",
+                        "Mache eine Minute lang einen freundlichen Nachrichtensprecher.",
+                        "Zeige ohne Worte, wie du dich auf den Feierabend freust.",
+                        "Erfinde einen Slogan für einen gewöhnlichen Gegenstand im Raum.",
+                        "Gib {{randomPlayer}} einen Tipp für einen entspannten Morgen.",
+                        "Erkläre eine schnelle Pause wie eine Wellness-Anleitung."
+                ],
+                "penalties": [
+                        "Was war dein peinlichster Versprecher?",
+                        "Welche harmlose Nachricht hast du schon einmal viel zu lange formuliert?"
+                ]
+        },
+        "lustig": {
+                "truths": [
+                        "Was ist das Albernste, worüber du viel zu lange lachen musstest?",
+                        "Welche völlig nutzlose Fähigkeit würdest du gern perfekt beherrschen?",
+                        "Was war dein kreativster Versuch, dich vor einer Aufgabe zu drücken?",
+                        "Welchen Spitznamen würdest du {{randomPlayer}} für einen Tag geben?",
+                        "Welche Mode aus deiner Vergangenheit würdest du gern vergessen?",
+                        "Was ist das Seltsamste, das du aus Versehen laut gesagt hast?",
+                        "Welche erfundene Ausrede von dir war besonders schlecht?",
+                        "Wenn dein Leben eine Sitcom wäre, wie würde sie heißen?",
+                        "Welches Tier wäre der schlechteste Chef?",
+                        "Welche völlig harmlose Sache findest du viel zu dramatisch?",
+                        "Was wäre dein Künstlername als Schlagersänger?",
+                        "Welche drei Dinge würdest du auf eine einsame Insel mitnehmen, die niemand braucht?",
+                        "Welches Geräusch kannst du überraschend gut nachmachen?",
+                        "Welche erfundene Regel würdest du für einen Tag einführen?",
+                        "Was wäre dein nutzloses Superhelden-Kostüm?",
+                        "Welchen Gegenstand würdest du als Haustier adoptieren?",
+                        "Was ist dein seltsamster Essensmix?",
+                        "Welche berühmte Person könnte dich in einem Kochduell schlagen?",
+                        "Was wäre der schlechteste Name für ein Haustier?",
+                        "Welche Situation macht dich grundlos nervös?",
+                        "Was wäre dein peinlicher Bühnenname?",
+                        "Welches Wort klingt für dich am lustigsten?",
+                        "Was würdest du tun, wenn du für einen Tag unsichtbar wärst – ganz harmlos?",
+                        "Welche völlig falsche Sache hast du als Kind geglaubt?",
+                        "Was wäre dein Talent in einer sehr seltsamen Talentshow?",
+                        "Welche Figur aus einem Film wäre eine Katastrophe als Mitbewohner?",
+                        "Was ist die lustigste Nachricht, die du versehentlich verschickt hast?",
+                        "Welches Essen sollte deiner Meinung nach eine eigene Feiertagswoche haben?",
+                        "Wenn du ein Geräusch wärst, welches wärst du?",
+                        "Welche Sache würdest du als Museumsstück ausstellen?",
+                        "Was wäre dein Motto, wenn du ein Pirat wärst?",
+                        "Welcher Gegenstand im Raum sieht am verdächtigsten aus?",
+                        "Was wäre der unnötigste olympische Wettbewerb?",
+                        "Welche Figur aus der Runde würde eine Zombie-Apokalypse am besten kommentieren?",
+                        "Wie würde dein Roboter-Haustier heißen?",
+                        "Was wäre dein Spezialgebiet in einer Quizshow für Unsinn?",
+                        "Welche absurde Erfindung würdest du gern patentieren?",
+                        "Welche Verschwörung über Tauben könntest du überzeugend erfinden?",
+                        "Was ist der schlechteste Rat, den ein Keks geben könnte?",
+                        "Welche Sache würdest du niemals in einer Talentshow vorführen?",
+                        "Was wäre dein Kampfschrei beim Öffnen einer Chipstüte?",
+                        "Welchen Titel hätte deine Autobiografie als Komödie?",
+                        "Was wäre dein Job, wenn du ein sprechender Toaster wärst?",
+                        "Was würde {{randomPlayer}} als völlig unnötige Superkraft wählen?",
+                        "Welches Gemüse hätte die beste Persönlichkeit?",
+                        "Was wäre das peinlichste Lied für deinen Auftritt?",
+                        "Wie würde eine Modenschau für Socken heißen?",
+                        "Welche Sache würdest du als Bürgermeister sofort verbieten – nur zum Spaß?",
+                        "Was ist die lustigste Ausrede für einen verpassten Bus?",
+                        "Welches Tier wäre am schlechtesten darin, Verstecken zu spielen?"
+                ],
+                "dares": [
+                        "Halte eine dramatische Dankesrede für deinen letzten Snack.",
+                        "Imitiere ein Tier, bis {{randomPlayer}} es errät.",
+                        "Erkläre, wie man Schuhe bindet, als wäre es eine Mondlandung.",
+                        "Lies den Titel eines Buchs oder Gegenstands mit einer übertriebenen Stimme vor.",
+                        "Erfinde einen Werbeslogan für {{randomPlayer}} – freundlich und nett.",
+                        "Mach deinen besten Siegesjubel, weil du gerade unsichtbar gewonnen hast.",
+                        "Sprich bis zu deinem nächsten Zug wie ein Nachrichtensprecher.",
+                        "Führe einen Roboter-Tanz für 15 Sekunden auf.",
+                        "Erfinde einen kurzen Rap über eine Banane.",
+                        "Stelle einen dramatischen Streit zwischen zwei Socken dar.",
+                        "Sprich 20 Sekunden lang wie ein Pirat.",
+                        "Mache einen Werbespot für einen unsichtbaren Kühlschrank.",
+                        "Erfinde einen Tanz, der aussieht wie ein Pinguin beim Einkaufen.",
+                        "Lies den letzten Satz, den du gesagt hast, wie ein Bösewicht vor.",
+                        "Stelle eine berühmte Szene mit einem Kissen nach.",
+                        "Erkläre {{randomPlayer}} die Regeln eines erfundenen Sports.",
+                        "Mache eine Modenschau mit einem Gegenstand aus dem Raum.",
+                        "Erfinde eine Wettervorhersage für den Fußboden.",
+                        "Imitiere einen Roboter, der gerade einen Witz verstanden hat.",
+                        "Nenne fünf absurde Verwendungen für einen Löffel.",
+                        "Spiele eine Nachrichtensendung über eine verschwundene Socke.",
+                        "Singe den Namen von {{randomPlayer}} wie eine Opernsängerin oder ein Opernsänger.",
+                        "Mache einen dramatischen Auftritt, als wärst du ein Keks-Star.",
+                        "Erfinde einen neuen Gruß für die Gruppe und bring ihn allen bei.",
+                        "Erkläre in 15 Sekunden, warum Wolken flauschige Haustiere wären.",
+                        "Stelle eine pantomimische Szene über einen sehr faulen Superhelden dar.",
+                        "Mache das Geräusch eines beleidigten Pinguins.",
+                        "Führe einen Siegestanz auf, weil du einen imaginären Wettbewerb gewonnen hast.",
+                        "Verkaufe einen Stuhl wie ein Luxusauto.",
+                        "Erfinde eine neue Sportart mit einem Kissen.",
+                        "Sage drei Zungenbrecher so schnell du kannst.",
+                        "Spiele einen Koch, der ein Sandwich mit Sternen bewertet.",
+                        "Erfinde einen Rap über das Wetter von heute.",
+                        "Stelle dein Lieblingsessen pantomimisch dar, bis es jemand errät.",
+                        "Mache aus dem Wort „Party“ einen dramatischen Filmtitel.",
+                        "Erkläre, wie man lacht, als wäre es eine komplizierte Wissenschaft.",
+                        "Tu so, als würdest du {{randomPlayer}} einen Preis für Unsinn verleihen.",
+                        "Erfinde eine kurze Liebeserklärung an deinen Lieblingssnack.",
+                        "Mache eine Zeitlupe-Version davon, wie du einen Raum betrittst.",
+                        "Spiele ein Tier, das gerade eine Steuererklärung ausfüllt.",
+                        "Erfinde eine Schlagzeile über deine heutige Stimmung.",
+                        "Führe eine dramatische Szene mit einem unsichtbaren Drachen auf.",
+                        "Sprich den nächsten Satz mit einer völlig übertriebenen Stimme.",
+                        "Nenne drei Dinge, die ein Alien an einem Supermarkt seltsam fände.",
+                        "Erfinde ein Maskottchen für die Gruppe und beschreibe es.",
+                        "Stelle einen Fahrstuhl dar, der schlechte Laune hat.",
+                        "Mach eine Runde, als würdest du über einen Laufsteg aus Käse gehen.",
+                        "Erfinde einen Werbeslogan für {{randomPlayer}} als Superheld.",
+                        "Erkläre einer imaginären Katze, warum du heute beschäftigt bist.",
+                        "Verleihe einem Gegenstand einen Preis für besondere Albernheit."
+                ],
+                "penalties": [
+                        "Welche peinliche Kleinigkeit bringt dich sofort zum Lachen?",
+                        "Was war dein unbeholfenster Versuch, cool zu wirken?"
+                ]
+        },
+        "deep": {
+                "truths": [
+                        "Worauf bist du stolz, obwohl du selten darüber sprichst?",
+                        "Was hilft dir, wenn du einen schwierigen Tag hast?",
+                        "Welche Eigenschaft an dir möchtest du mehr wertschätzen?",
+                        "Was hast du von {{randomPlayer}} gelernt?",
+                        "Wann fühlst du dich am meisten verstanden?",
+                        "Welche Erinnerung macht dich zuverlässig glücklich?",
+                        "Was würdest du deinem jüngeren Ich gern sagen?",
+                        "Was bedeutet für dich eine gute Freundschaft?",
+                        "Welche Erinnerung würdest du gern noch einmal erleben?",
+                        "Wobei fühlst du dich wirklich wie du selbst?",
+                        "Was möchtest du in deinem Leben öfter sagen?",
+                        "Welche Person hat dich positiv überrascht?",
+                        "Was hast du über dich in einem schwierigen Moment gelernt?",
+                        "Welche kleine Veränderung hat dir viel bedeutet?",
+                        "Was ist eine Stärke, die du erst spät erkannt hast?",
+                        "Wann hast du dich zuletzt besonders mutig gefühlt?",
+                        "Welche Art Unterstützung hilft dir am meisten?",
+                        "Was würdest du gern einmal ohne Angst ausprobieren?",
+                        "Welche Erinnerung an {{randomPlayer}} bringt dich zum Lächeln?",
+                        "Was bedeutet Erfolg für dich persönlich?",
+                        "Welche Entscheidung würdest du heute wieder treffen?",
+                        "Was möchtest du in einem Jahr über dich sagen können?",
+                        "Wann fühlst du dich mit anderen verbunden?",
+                        "Was ist etwas, das du gern besser verstehen würdest?",
+                        "Welche Eigenschaft bewunderst du an einer nahestehenden Person?",
+                        "Was gibt dir Hoffnung, wenn etwas nicht klappt?",
+                        "Welche Frage stellst du dir gerade öfter?",
+                        "Was hast du zuletzt aus einem Fehler gelernt?",
+                        "Worauf möchtest du künftig mehr achten?",
+                        "Was bedeutet Zuhause für dich?",
+                        "Welche Grenze hat dir geholfen, dich besser zu fühlen?",
+                        "Was möchtest du gern an andere weitergeben?",
+                        "Welche Sache hast du dir selbst verziehen?",
+                        "Was wünschst du dir für deine Freundschaften?",
+                        "Woran merkst du, dass du jemandem vertrauen kannst?",
+                        "Welche Erfahrung hat deine Sicht auf etwas verändert?",
+                        "Was würdest du gern öfter feiern?",
+                        "Was macht einen gewöhnlichen Tag für dich wertvoll?",
+                        "Welche Frage würdest du gern mit {{randomPlayer}} besprechen?",
+                        "Was fällt dir leicht, obwohl es anderen schwerfällt?",
+                        "Was möchtest du in deinem Leben bewahren?",
+                        "Wann hast du zuletzt deine Meinung geändert?",
+                        "Welche Gewohnheit tut dir gut?",
+                        "Was ist eine Sache, die du an dir akzeptierst?",
+                        "Welche Erinnerung verbindest du mit einem Gefühl von Stolz?",
+                        "Was bedeutet es für dich, ehrlich zu sein?",
+                        "Welche Person hat dir eine wichtige Lektion beigebracht?",
+                        "Was wünschst du deinem zukünftigen Ich?",
+                        "Welche Fähigkeit möchtest du noch entwickeln?",
+                        "Was möchtest du in deinem Leben mit mehr Ruhe angehen?"
+                ],
+                "dares": [
+                        "Sag {{randomPlayer}} etwas, das du an der Person ehrlich schätzt.",
+                        "Teile eine kleine Sache, auf die du dich in nächster Zeit freust.",
+                        "Wähle jemanden aus und frage, was der Person heute gutgetan hat.",
+                        "Erzähle eine Erinnerung, die dich zum Lächeln bringt.",
+                        "Gib {{randomPlayer}} ein Kompliment, das nichts mit dem Aussehen zu tun hat.",
+                        "Nenne eine Sache, für die du heute dankbar bist.",
+                        "Lass die Gruppe ein positives Wort für dich aussuchen und wiederhole es selbst.",
+                        "Frage {{randomPlayer}}, welches Hobby die Person gern einmal ausprobieren würde.",
+                        "Teile eine kleine Erkenntnis, die du in letzter Zeit hattest.",
+                        "Sag einer Person, welche Stärke du an ihr wahrnimmst.",
+                        "Erzähle von einem Moment, in dem du dich willkommen gefühlt hast.",
+                        "Nenne einen Wert, der dir im Leben wichtig ist.",
+                        "Frage {{randomPlayer}}, welche Erinnerung die Person gern bewahrt.",
+                        "Teile eine Sache, die dir hilft, dich zu konzentrieren.",
+                        "Beschreibe einen Ort, an dem du dich ruhig fühlst.",
+                        "Nenne eine Person, der du gern einmal Danke sagen möchtest.",
+                        "Erzähle von etwas, das du früher schwierig fandest und nun besser kannst.",
+                        "Frage jemanden, worauf die Person gerade stolz ist.",
+                        "Nenne ein Ziel, das du ohne Zeitdruck verfolgen möchtest.",
+                        "Teile eine Sache, die du an einer Freundschaft schätzt.",
+                        "Gib {{randomPlayer}} einen aufmunternden Satz mit.",
+                        "Erzähle, welche Musik dir in einem schwierigen Moment hilft.",
+                        "Nenne eine Entscheidung, die dir Selbstvertrauen gegeben hat.",
+                        "Frage {{randomPlayer}}, was einen Tag für die Person besser macht.",
+                        "Teile eine Sache, die du gern häufiger lernen würdest.",
+                        "Nenne eine kleine Freude, die du heute erlebt hast.",
+                        "Beschreibe, wie ein idealer ruhiger Abend für dich aussieht.",
+                        "Sage einer Person, was du an ihrer Art zu zuhören magst.",
+                        "Erzähle von einem Kompliment, an das du dich erinnerst.",
+                        "Nenne eine Sache, die du gern mit mehr Geduld angehen möchtest.",
+                        "Frage {{randomPlayer}}, welche Fähigkeit die Person gern hätte.",
+                        "Teile eine Erinnerung an einen gelungenen gemeinsamen Tag.",
+                        "Nenne eine Sache, die du in deinem Alltag wertschätzt.",
+                        "Erzähle von einer Person, die dich inspiriert, ohne private Details.",
+                        "Frage jemanden, was der Person hilft, sich zu entspannen.",
+                        "Nenne einen Gedanken, der dich zuletzt motiviert hat.",
+                        "Teile eine Sache, die du an dir selbst respektierst.",
+                        "Beschreibe eine freundliche Geste, die dir lange im Kopf blieb.",
+                        "Frage {{randomPlayer}}, welche kleine Tradition die Person mag.",
+                        "Nenne eine Sache, für die du dir selbst dankbar bist.",
+                        "Erzähle, was du an einem guten Gespräch schätzt.",
+                        "Wünsche der Person links von dir etwas Nettes für die Woche.",
+                        "Teile ein Ziel, auf das du dich freust.",
+                        "Nenne eine Sache, die du gern an die nächste Generation weitergeben würdest.",
+                        "Frage {{randomPlayer}}, was der Person Kraft gibt.",
+                        "Erzähle von einer Situation, in der jemand an dich geglaubt hat.",
+                        "Nenne einen Moment, in dem du dich selbst überrascht hast.",
+                        "Mache der Gruppe ein ehrliches Kompliment.",
+                        "Teile eine Sache, die du gern öfter tun würdest.",
+                        "Nenne eine kleine Sache, mit der du dir heute etwas Gutes tun kannst."
+                ],
+                "penalties": [
+                        "Welche kleine Unsicherheit konntest du mit der Zeit besser annehmen?",
+                        "Wann hast du zuletzt um Hilfe gebeten, obwohl es dir nicht leichtfiel?"
+                ]
+        },
+        "deep-extrem": {
+                "truths": [
+                        "Welche Entscheidung hat dich stärker verändert, als du erwartet hattest?",
+                        "Was würdest du gern loslassen, wenn du dazu bereit bist?",
+                        "Wann hast du dich zuletzt selbst überrascht?",
+                        "Welche Grenze möchtest du anderen klarer mitteilen?",
+                        "Was fällt dir schwer auszusprechen, obwohl es dir wichtig ist?",
+                        "Wofür würdest du gern mehr Mut aufbringen?",
+                        "Was möchtest du, dass {{randomPlayer}} über dich besser versteht?",
+                        "Welche Wahrheit über dich selbst hast du erst spät akzeptiert?",
+                        "Was würdest du gern aussprechen, wenn du dich vollkommen sicher fühlst?",
+                        "Welche Grenze war für dich besonders schwer zu setzen?",
+                        "Was möchtest du nicht mehr für andere verstellen?",
+                        "Welche Entscheidung würdest du gern besser verstehen?",
+                        "Was hast du lange geglaubt und später hinterfragt?",
+                        "Wann warst du zuletzt stolz darauf, Nein gesagt zu haben?",
+                        "Was möchtest du deinem zukünftigen Ich unbedingt mitgeben?",
+                        "Welche Erwartung an dich selbst möchtest du lockern?",
+                        "Was hat dich gelehrt, dir selbst mehr zu vertrauen?",
+                        "Welche Frage über dein Leben vermeidest du manchmal?",
+                        "Was möchtest du gern annehmen, statt es zu verändern?",
+                        "Welche Erfahrung hat dich widerstandsfähiger gemacht?",
+                        "Wann hast du dich trotz Unsicherheit gezeigt?",
+                        "Was wünschst du dir, andere würden über deine Grenzen wissen?",
+                        "Welche alte Rolle möchtest du nicht mehr spielen?",
+                        "Was ist eine Wahrheit, die du erst nach und nach verstanden hast?",
+                        "Welche Herausforderung hat dir eine neue Seite von dir gezeigt?",
+                        "Was würdest du tun, wenn du niemandem etwas beweisen müsstest?",
+                        "Welchen Teil deiner Geschichte erzählst du selten, obwohl er dich geprägt hat?",
+                        "Wann hast du zuletzt um etwas gebeten, das du wirklich brauchtest?",
+                        "Welche Beziehung hat dir gezeigt, was dir wichtig ist?",
+                        "Was möchtest du dir selbst nicht länger vorwerfen?",
+                        "Welche Hoffnung hältst du trotz Rückschlägen fest?",
+                        "Was würdest du gern mutiger ansprechen?",
+                        "Welche Entscheidung hat dir geholfen, dich selbst ernst zu nehmen?",
+                        "Was möchtest du in deinem Leben nicht länger aufschieben?",
+                        "Wann hast du zuletzt etwas losgelassen, das dir nicht guttat?",
+                        "Welche Wahrheit über deine Bedürfnisse möchtest du klarer erkennen?",
+                        "Was bedeutet Verletzlichkeit für dich?",
+                        "Welche Frage würdest du gern stellen, ohne eine Antwort zu erwarten?",
+                        "Was war ein Wendepunkt, den du erst im Nachhinein erkannt hast?",
+                        "Welche Erinnerung möchtest du mit mehr Mitgefühl betrachten?",
+                        "Welche Erwartung anderer möchtest du nicht mehr erfüllen müssen?",
+                        "Was würdest du gern an {{randomPlayer}} besser verstehen?",
+                        "Wann hast du dich zuletzt selbst verteidigt?",
+                        "Welche Entscheidung möchtest du dir selbst zugestehen?",
+                        "Was soll sich in deinem Leben ehrlich verändern?",
+                        "Welche Stärke zeigt sich bei dir erst unter Druck?",
+                        "Was fällt dir schwer anzunehmen, obwohl du es verdienst?",
+                        "Welcher Teil deiner Zukunft macht dir gleichzeitig Angst und Hoffnung?",
+                        "Was möchtest du endlich nicht mehr kleinreden?",
+                        "Welche Grenze schützt etwas Wichtiges in deinem Leben?"
+                ],
+                "dares": [
+                        "Erzähle {{randomPlayer}} von einer Stärke, die du an der Person siehst.",
+                        "Teile eine persönliche Erkenntnis, die du freiwillig erzählen möchtest.",
+                        "Frage {{randomPlayer}}, welche Grenze in Freundschaften besonders wichtig ist.",
+                        "Nenne eine Sache, die du an dir selbst respektierst.",
+                        "Sag einer Person in der Runde, wofür du ihr dankbar bist.",
+                        "Erzähle von einem Moment, in dem du dich getraut hast, Nein zu sagen.",
+                        "Frage {{randomPlayer}} nach einem Ziel, das der Person wirklich am Herzen liegt.",
+                        "Teile etwas, das du gern öfter feiern würdest, auch wenn es klein ist.",
+                        "Nenne eine Grenze, die du heute besser kommunizieren kannst als früher.",
+                        "Erzähle freiwillig von einer Sache, die du an dir akzeptiert hast.",
+                        "Frage {{randomPlayer}}, welche Qualität der Person in schwierigen Zeiten hilft.",
+                        "Teile einen Satz, den du deinem jüngeren Ich gern sagen würdest.",
+                        "Nenne eine Entscheidung, für die du dir selbst Anerkennung gibst.",
+                        "Frage die Gruppe nach einer Stärke, die sie in dir sieht; du darfst passen.",
+                        "Erzähle von einem Moment, in dem du trotz Angst weitergemacht hast.",
+                        "Nenne eine Erwartung, die du bewusst loslassen möchtest.",
+                        "Sage {{randomPlayer}} eine Sache, die du an der Person respektierst.",
+                        "Teile eine Erkenntnis, die du erst durch einen Fehler gewonnen hast.",
+                        "Nenne etwas, das du nicht mehr allen recht machen möchtest.",
+                        "Frage {{randomPlayer}}, was der Person hilft, eine Grenze zu setzen.",
+                        "Beschreibe eine Veränderung, auf die du vorsichtig hoffst.",
+                        "Nenne einen Moment, in dem du dir selbst vertraut hast.",
+                        "Teile eine Sache, die du nicht länger als Schwäche ansehen möchtest.",
+                        "Sage der Gruppe, welche Art Unterstützung du am meisten schätzt.",
+                        "Frage jemanden, welche kleine Entscheidung der Person Mut gegeben hat.",
+                        "Nenne eine schwierige Sache, für die du dir heute Mitgefühl gibst.",
+                        "Teile einen Wunsch für dich selbst, den du bisher selten aussprichst.",
+                        "Beschreibe eine Grenze, die für dich in Freundschaften wichtig ist.",
+                        "Sage {{randomPlayer}}, was du von der Person gern lernen würdest.",
+                        "Nenne eine Wahrheit, die dir geholfen hat, dich besser zu verstehen.",
+                        "Teile eine Sache, bei der du künftig ehrlicher zu dir sein möchtest.",
+                        "Frage jemanden, worauf die Person trotz Unsicherheit stolz ist.",
+                        "Nenne eine Entscheidung, die du treffen würdest, wenn du dir mehr vertraust.",
+                        "Erzähle von einer Situation, in der du dich selbst überrascht hast.",
+                        "Sage einer Person, wofür du ihre Unterstützung schätzt.",
+                        "Nenne einen Gedanken, den du gern loslassen möchtest.",
+                        "Frage {{randomPlayer}}, was die Person gern öfter für sich tun würde.",
+                        "Teile eine Erkenntnis über deine eigenen Bedürfnisse.",
+                        "Nenne eine Sache, die du dir selbst öfter erlauben möchtest.",
+                        "Beschreibe, was ein sicheres Gespräch für dich ausmacht.",
+                        "Sage der Runde, welchen kleinen Schritt du als Nächstes wagen möchtest.",
+                        "Nenne eine Situation, in der du dich gut abgegrenzt hast.",
+                        "Frage {{randomPlayer}}, was der Person Hoffnung gibt.",
+                        "Teile einen Satz, den du hören musstest und heute weitergeben möchtest.",
+                        "Nenne etwas, das du nicht länger beweisen möchtest.",
+                        "Erzähle, wie du dich selbst in einem schwierigen Moment unterstützen kannst.",
+                        "Sage einer Person, welche mutige Seite du an ihr wahrnimmst.",
+                        "Teile etwas, das du gern ohne Scham annehmen möchtest.",
+                        "Nenne eine Frage, der du dich in deinem Tempo stellen möchtest.",
+                        "Sage, was du einer Person gern mitteilen würdest, ohne sie nennen zu müssen."
+                ],
+                "penalties": [
+                        "Was ist eine harmlose Sache, für die du dich manchmal unnötig schämst?",
+                        "Welche mutige Frage würdest du gern stellen, darf aber auch unbeantwortet bleiben?"
+                ]
+        },
+        "freaky": {
+                "truths": [
+                        "Was ist dein liebster harmloser Flirt-Move?",
+                        "Was macht jemanden für dich sofort sympathisch?",
+                        "Mit wem aus der Runde würdest du auf ein spontanes Abenteuer gehen?",
+                        "Welche romantische Filmszene findest du heimlich schön?",
+                        "Was war dein süßester Crush-Moment?",
+                        "Was ist für dich ein perfektes erstes Date?",
+                        "Welche Nachricht würdest du gern von {{randomPlayer}} bekommen?",
+                        "Was ist dein ungewöhnlichster Green Flag?",
+                        "Wann wirst du beim Flirten nervös?",
+                        "Was ist das Mutigste, das du je für einen Crush getan hast?",
+                        "Welche Stimme findest du besonders angenehm?",
+                        "Was ist dein liebstes Kompliment, das du je bekommen hast?",
+                        "Was wäre dein charmantester Anmachspruch?",
+                        "Welche Eigenschaft macht {{randomPlayer}} besonders interessant?",
+                        "Welche kleine Geste findest du romantisch?",
+                        "Würdest du eher ein spontanes Date oder einen geplanten Abend wählen?",
+                        "Welche fiktive Figur wäre dein ungewöhnlicher Crush?",
+                        "Was ist dein peinlichster Flirt-Fail?",
+                        "Welche Farbe findest du bei einem Outfit besonders attraktiv?",
+                        "Welches Lied würde bei deinem romantischen Auftritt laufen?",
+                        "Was wäre dein Traumziel für ein Date?",
+                        "Was ist deine größte Schwäche bei einem charmanten Lächeln?",
+                        "Welche nette Nachricht hast du schon oft umgeschrieben, bevor du sie abgeschickt hast?",
+                        "Wen würdest du für einen Tag als Dating-Coach wählen?",
+                        "Was ist eine harmlose Sache, die dich sofort verlegen macht?",
+                        "Welche berühmte Person wäre dein Promi-Date?",
+                        "Was macht ein Kompliment für dich glaubwürdig?",
+                        "Was wäre dein süßester Spitzname für {{randomPlayer}}?",
+                        "Würdest du lieber den ersten Schritt machen oder angesprochen werden?",
+                        "Was war dein längster heimlicher Schwarm?",
+                        "Welche romantische Tradition würdest du gern ausprobieren?",
+                        "Was findest du charmanter: Humor oder Selbstbewusstsein?",
+                        "Welche harmlose Nachricht würdest du dich kaum trauen zu senden?",
+                        "Was ist dein liebstes Date-Outfit?",
+                        "Welcher Song erinnert dich an einen Crush?",
+                        "Was wäre dein perfekter gemütlicher Abend zu zweit?",
+                        "Welche Eigenschaft lässt dich jemanden sofort vermissen?",
+                        "Was ist das Süßeste, das jemand für dich getan hat?",
+                        "Würdest du {{randomPlayer}} zu einem spontanen Kaffee einladen?",
+                        "Welche kleine Marotte findest du bei anderen charmant?",
+                        "Was wäre dein Kennenlern-Song?",
+                        "Wer aus der Runde könnte am besten Liebesbriefe schreiben?",
+                        "Was ist dein liebster romantischer Klischee?",
+                        "Woran merkst du, dass du jemanden wirklich magst?",
+                        "Welche Frage würdest du einem Crush gern stellen?",
+                        "Was macht ein Date für dich unvergesslich?",
+                        "Wer aus der Runde hat deiner Meinung nach den besten Charme?",
+                        "Was ist dein mutigster Plan für ein Date?",
+                        "Welche nette Eigenschaft würdest du gern öfter hören?",
+                        "Was ist eine harmlose Sache, die dich beim Flirten aus dem Konzept bringt?",
+                        "Welche romantische Fantasie aus einem Film würdest du gern erleben?",
+                        "Wer aus der Runde bringt dich am ehesten zum Erröten?",
+                        "Welche Art von Aufmerksamkeit lässt dich schwach werden?",
+                        "Würdest du {{randomPlayer}} auf ein geheimes Fantasie-Date einladen?",
+                        "Was ist dein frechster, aber noch harmloser Gedanke über ein Date?",
+                        "Welche Person würdest du für einen überraschenden Tanz wählen?",
+                        "Was ist dein größter Flirt-Geheimtipp?",
+                        "Wen würdest du für eine romantische Filmszene casten?",
+                        "Was war dein intensivster Crush, ohne private Details zu verraten?",
+                        "Welches Kompliment würde dich sofort sprachlos machen?",
+                        "Welche harmlose Fantasie-Date-Idee würdest du gern ausprobieren?",
+                        "Wer könnte dich mit einem einzigen Satz zum Lachen bringen?",
+                        "Wann hast du zuletzt absichtlich besonders gut ausgesehen?",
+                        "Welche Person aus der Runde würdest du für einen Tanz fragen?",
+                        "Was wäre dein mutigster erster Schritt bei einem Crush?",
+                        "Was ist dein größtes romantisches Klischee, das du heimlich magst?",
+                        "Welche harmlose Flirt-Nachricht würdest du gern erhalten?",
+                        "Was ist das Verrückteste, das du für ein Date planen würdest?",
+                        "Welche Person hat den gefährlichsten Blick – rein filmisch gemeint?",
+                        "Würdest du lieber ein spontanes Nacht-Date oder ein Frühstücksdate wählen?",
+                        "Welche Eigenschaft einer Person bringt dich schnell ins Schwärmen?",
+                        "Was wäre dein frechster, aber netter Spitzname für {{randomPlayer}}?",
+                        "Wer aus der Runde wäre in einer Rom-Com dein unerwarteter Love Interest?",
+                        "Welche romantische Geste würdest du dich selbst kaum trauen zu machen?",
+                        "Was ist eine Frage, die du einem Crush nur anonym stellen würdest?",
+                        "Was war dein dramatischster Moment wegen eines Schwarmes?",
+                        "Welcher Blick oder welches Lächeln bleibt dir lange im Kopf?",
+                        "Welche Person würdest du für ein spontanes Tanz-Battle wählen?",
+                        "Was ist die kühnste Einladung, die du gern aussprechen würdest?",
+                        "Was wäre ein Date, das du nur in einer Mutprobe vorschlagen würdest?",
+                        "Wer aus der Runde könnte dich am ehesten charmant überreden?",
+                        "Welches Geheimnis über deinen Dating-Geschmack kannst du teilen?",
+                        "Was ist dein mutigster Wunsch für ein zukünftiges Date?",
+                        "Welche Person würdest du für eine Szene voller Spannung casten?",
+                        "Welcher Song würde bei deinem dramatischen Liebesgeständnis laufen?",
+                        "Was würdest du tun, wenn dein Crush jetzt den Raum betritt?",
+                        "Wen würdest du für einen völlig übertriebenen Liebesbrief auswählen?",
+                        "Welche kleine Geste fühlt sich für dich besonders intim und vertraut an?",
+                        "Was war dein ungewöhnlichster Grund, jemanden attraktiv zu finden?",
+                        "Wen würdest du als Partner:in für ein Rollenspiel im Krimi wählen?",
+                        "Welche harmlose Nachricht würdest du dich nur nach Mitternacht trauen?",
+                        "Was ist der frechste Titel für deine romantische Autobiografie?",
+                        "Mit wem aus der Runde würdest du eine Szene aus einer Liebeskomödie nachspielen?",
+                        "Was würdest du an einem perfekten Date geheimnisvoll gestalten?",
+                        "Welche Person könnte dich zu einem spontanen Abenteuer überreden?",
+                        "Was ist dein gewagtester romantischer Plan, den du noch nicht ausprobiert hast?",
+                        "Welche Frage über deinen Crush-Geschmack hast du noch nie beantwortet?",
+                        "Wer aus der Runde hätte deiner Meinung nach die beste geheime Verehrerin oder den besten geheimen Verehrer?",
+                        "Welche Fantasie-Date-Idee klingt verrückt, aber eigentlich toll?",
+                        "Was würdest du {{randomPlayer}} gern sagen, wenn du keinerlei Lampenfieber hättest?"
+                ],
+                "dares": [
+                        "Mache {{randomPlayer}} ein charmantes, ehrliches Kompliment.",
+                        "Halte {{randomPlayer}} eine zehnsekündige, kitschige Liebesrede.",
+                        "Flirte 15 Sekunden lang übertrieben höflich mit einem Gegenstand.",
+                        "Erfinde einen romantischen Filmtitel über dich und {{randomPlayer}}.",
+                        "Singe {{randomPlayer}} eine Zeile aus einem Liebeslied vor.",
+                        "Mache einer Person deiner Wahl ein Kompliment zu ihrem Humor.",
+                        "Lies den Namen von {{randomPlayer}} wie in einer Dating-Show vor.",
+                        "Stelle {{randomPlayer}} eine harmlose Frage für ein erstes Date.",
+                        "Erfinde für {{randomPlayer}} einen charmanten Spitznamen.",
+                        "Spiele eine übertriebene Szene nach, in der du jemanden um einen Kaffee bittest.",
+                        "Beschreibe dein Traumdate in höchstens zehn Wörtern.",
+                        "Mache einen dramatischen Catwalk durch den Raum.",
+                        "Schicke {{randomPlayer}} einen Luftkuss, wenn die Person damit einverstanden ist; sonst winke charmant.",
+                        "Schaue {{randomPlayer}} drei Sekunden in die Augen, nur wenn beide einverstanden sind; sonst schaut euch einen Punkt an.",
+                        "Erfinde spontan einen freundlichen Anmachspruch für {{randomPlayer}}.",
+                        "Widme {{randomPlayer}} eine improvisierte Mini-Serenade.",
+                        "Lass die Gruppe ein Date-Szenario nennen und spiele die Begrüßung.",
+                        "Mache {{randomPlayer}} ein Kompliment, ohne das Aussehen zu erwähnen.",
+                        "Erzähle in einer dramatischen Stimme, wie ihr euch kennengelernt habt – frei erfunden.",
+                        "Stelle eine romantische Filmszene pantomimisch dar.",
+                        "Erfinde einen gemeinsamen Teamnamen für dich und {{randomPlayer}}.",
+                        "Nenne drei Eigenschaften, die ein perfektes Date braucht.",
+                        "Sag einen selbst erfundenen Liebesspruch mit ernster Miene.",
+                        "Lass {{randomPlayer}} ein Emoji aussuchen und erkläre es als Liebessymbol.",
+                        "Mache einer Person deiner Wahl eine höfliche Einladung zu einem Fantasie-Date.",
+                        "Führe einen Siegestanz auf, als hättest du gerade dein Traumdate gebucht.",
+                        "Gib {{randomPlayer}} einen Titel wie „König:in des Charmes“.",
+                        "Spiele zehn Sekunden lang deinen besten Flirt-Blick, ohne jemanden zu berühren.",
+                        "Erfinde ein romantisches Gedicht mit den Wörtern Orange und Abend.",
+                        "Mache eine dramatische Verbeugung vor {{randomPlayer}}.",
+                        "Lies einen gewöhnlichen Satz so vor, als wäre es eine Liebeserklärung.",
+                        "Erkläre, warum {{randomPlayer}} in einer Sitcom die Hauptrolle hätte.",
+                        "Spiele eine Szene, in der du um ein zweites Date bittest.",
+                        "Erfinde ein Date, das nur fünf Euro kostet, und pitche es der Gruppe.",
+                        "Lass die Gruppe deinen Dating-Profil-Slogan bewerten.",
+                        "Mache {{randomPlayer}} ein Kompliment in Reimform.",
+                        "Wähle ein Lied als Soundtrack für {{randomPlayer}} und summe es an.",
+                        "Sage deinen besten Anmachspruch mit einem völlig übertriebenen Akzent.",
+                        "Stelle {{randomPlayer}} eine witzige Kennenlernfrage.",
+                        "Spiele einen schüchternen ersten Gruß in Zeitlupe nach.",
+                        "Erfinde ein geheimes Handzeichen für dich und {{randomPlayer}}; nur wenn die Person mitmacht.",
+                        "Beschreibe {{randomPlayer}} als Figur in einer romantischen Komödie.",
+                        "Mache eine freundliche Verbeugung und lade die Runde zu einem Fantasie-Ball ein.",
+                        "Erfinde den Namen eines gemeinsamen Café-Getränks für dich und {{randomPlayer}}.",
+                        "Sag der Person gegenüber eine Sache, die du an ihr schätzt.",
+                        "Spiele eine Film-Promo für dein imaginäres erstes Date.",
+                        "Nenne {{randomPlayer}} drei harmlose Gründe, warum die Person ein guter Date-Partner wäre.",
+                        "Wähle einen Songtitel als deine persönliche Flirt-Hymne und erkläre warum.",
+                        "Mache eine dramatische Pause und sage dann ein nettes Kompliment.",
+                        "Schreibe im Kopf eine Einladung zu einem Kaffee und trage sie theatralisch vor.",
+                        "Flirte 20 Sekunden lang mit {{randomPlayer}}, aber bleib respektvoll.",
+                        "Spiele eine dramatische geheime Liebeserklärung an einen Gegenstand.",
+                        "Lade {{randomPlayer}} mit maximalem Selbstbewusstsein zu einem Fantasie-Date ein.",
+                        "Führe einen verführerisch dramatischen Catwalk auf – ohne jemanden zu berühren.",
+                        "Sage {{randomPlayer}} ein freches, aber freundliches Kompliment.",
+                        "Spiele eine Szene nach, in der du deinen Crush zufällig triffst.",
+                        "Erfinde eine geheime Nachricht an {{randomPlayer}} und lies sie vor.",
+                        "Halte einen leidenschaftlichen Vortrag darüber, warum Pizza ein perfektes Date ist.",
+                        "Tanze 15 Sekunden lang, als wärst du im Musikvideo deiner Flirt-Hymne.",
+                        "Mache {{randomPlayer}} einen Heiratsantrag für eine gemeinsame Pizza – rein zum Spaß.",
+                        "Spiele einen Blick, der angeblich Herzen schmelzen lässt.",
+                        "Erfinde einen geheimnisvollen Spitznamen für {{randomPlayer}}.",
+                        "Lies einen Einkaufszettel wie eine dramatische Liebesbotschaft vor.",
+                        "Stelle {{randomPlayer}} eine gewagte, aber harmlose Date-Frage.",
+                        "Imitiere eine Rom-Com-Hauptfigur, die gerade ihren Crush entdeckt.",
+                        "Mache eine dramatische Einladung zu einem imaginären Mitternachts-Picknick.",
+                        "Singe für {{randomPlayer}} eine Zeile aus einem Song mit maximaler Dramatik.",
+                        "Sage der Gruppe deinen selbstbewusstesten Flirtspruch.",
+                        "Spiele, wie du {{randomPlayer}} in einer Bar um einen Tanz bitten würdest.",
+                        "Erfinde eine geheime Agentenmission für ein Date mit {{randomPlayer}}.",
+                        "Mache eine übertriebene Verbeugung und biete {{randomPlayer}} einen Fantasie-Cocktail an.",
+                        "Schaue {{randomPlayer}} drei Sekunden in die Augen, wenn beide einverstanden sind; sonst in die Kamera.",
+                        "Lass {{randomPlayer}} deine nächste Flirt-Pose bestimmen; du darfst jederzeit passen.",
+                        "Führe eine dramatische Szene auf, in der du um eine zweite Chance bittest.",
+                        "Erkläre mit ernster Miene, warum du der Hauptgewinn beim Date-Lotto bist.",
+                        "Erfinde einen geheimen Handschlag für ein imaginäres Power-Couple.",
+                        "Mache einer Person ein Kompliment, das sie garantiert zum Lächeln bringt.",
+                        "Spiele einen geheimnisvollen Auftritt in Zeitlupe.",
+                        "Erfinde einen heißen, aber familienfreundlichen Filmtitel über dein Dating-Leben.",
+                        "Trage einen völlig normalen Satz so vor, als wäre er ein frecher Flirt.",
+                        "Lass die Gruppe eine harmlose Date-Idee aussuchen und verkaufe sie überzeugend.",
+                        "Mache {{randomPlayer}} ein Kompliment mit drei passenden Emojis.",
+                        "Spiele eine Szene, in der du versehentlich einen Liebesbrief an die falsche Person gibst.",
+                        "Nenne deinen besten Grund, warum {{randomPlayer}} eine Hauptrolle verdient.",
+                        "Führe einen dramatischen Luftkuss in die Luft aus oder winke geheimnisvoll.",
+                        "Erfinde eine spontane Einladung zu einem Date im Weltall.",
+                        "Flüstere eine harmlose Geheimbotschaft an {{randomPlayer}} – nur wenn die Person einverstanden ist.",
+                        "Stelle dich vor, als würdest du in einer Dating-Show um {{randomPlayer}} werben.",
+                        "Mache zehn Sekunden lang deine beste geheimnisvolle Pose.",
+                        "Erfinde eine romantische Ausrede, um {{randomPlayer}} einen Kaffee anzubieten.",
+                        "Wähle einen Song als Soundtrack für deinen dramatischen Auftritt.",
+                        "Spiele eine Szene, in der du einen Crush zu einem Tanz aufforderst.",
+                        "Führe eine Mini-Modenschau für dein imaginäres erstes Date auf.",
+                        "Mache {{randomPlayer}} eine Einladung zu einem Fantasie-Abenteuer mit dramatischer Stimme.",
+                        "Erfinde drei harmlose Regeln für ein Date mit dir.",
+                        "Sag einen frechen, aber respektvollen Anmachspruch und verbeuge dich danach.",
+                        "Spiele, wie du mit einem geheimnisvollen Lächeln den Raum betrittst.",
+                        "Lass die Runde deinen romantischen Spitznamen bestimmen und stelle dich damit vor.",
+                        "Beschreibe {{randomPlayer}} als geheimnisvolle Hauptfigur eines Films.",
+                        "Führe eine dramatische Liebesrede an deinen Lieblingssnack."
+                ],
+                "penalties": [
+                        "Was war dein peinlichster, aber harmloser Flirt-Moment?",
+                        "Welche Nachricht an einen Crush hast du am längsten überlegt?",
+                        "Welche harmlose Flirt-Nachricht hat dich schon einmal nervös gemacht?",
+                        "Was ist dein peinlichster Moment, in dem du beeindrucken wolltest?"
+                ]
+        },
+        "extrem-freaky": {
+                "truths": [
+                        "Was ist das freakigste, worauf du richtig horny wirst?",
+                        "Hast du schon mal heimlich jemanden angeschaut und dabei richtig horny geworden?",
+                        "Welches Körperteil von dir findest du am hottesten und warum?",
+                        "Was war der freakigste Gedanke, den du jemals während einer Party hattest?",
+                        "Hast du schon mal in der Öffentlichkeit so getan, als wärst du total horny, nur um jemanden zu triggern?",
+                        "Würdest du dich mal komplett jemandem ausliefern, der richtig freaky ist?",
+                        "Was ist deine aktuellste horny Fantasy, die du noch niemandem erzählt hast?",
+                        "Hast du schon mal absichtlich jemand anderen richtig horny gemacht, ohne etwas zu machen?",
+                        "Welches Tabu findest du eigentlich irgendwie hot, auch wenn es freaky ist?",
+                        "Was war der peinlichste Moment, in dem du plötzlich mega horny geworden bist?",
+                        "Hast du schon mal Dirty Talk benutzt und wie freaky war es?",
+                        "Würdest du dich filmen lassen, wenn es richtig freaky und privat bleibt?",
+                        "Was ist das dreckigste Kompliment, das du jemals bekommen oder gegeben hast?",
+                        "Hast du schon mal an eine Gruppensituation gedacht und dabei horny geworden?",
+                        "Welches Kleidungsstück an jemand anderem macht dich sofort horny?",
+                        "Was würdest du tun, wenn du für eine Stunde total die Kontrolle über jemanden hättest und es freaky sein dürfte?",
+                        "Hast du schon mal jemanden absichtlich gedemütigt oder dich demütigen lassen – auf eine hotte Art?",
+                        "Was ist deine freakigste Wichsfantasie gerade jetzt?",
+                        "Hast du schon mal Sexspielzeug benutzt oder darüber nachgedacht und wie war der Gedanke?",
+                        "Was ist das extremste, worauf du horny werden könntest, ohne es wirklich zu tun?"
+                ],
+                "dares": [
+                        "Sag dem heißesten Menschen im Raum in einem Satz, was dich an ihm/ihr gerade freaky horny macht.",
+                        "Mach für 30 Sekunden einen richtig sexy und übertriebenen Dance Move.",
+                        "Flüstere dem Spieler neben dir etwas richtig Dirty und Freaky ins Ohr.",
+                        "Zeig allen deine heißeste Pose und halte sie 10 Sekunden.",
+                        "Lass dir von jemandem sagen, welches Kleidungsstück du als Nächstes ausziehen sollst (nur eins, und nur wenn du willst).",
+                        "Beschreibe in drei Sätzen, wie du jemanden im Raum richtig horny machen würdest – ohne anzufassen.",
+                        "Mach ein übertriebenes Stöhnen und lass alle raten, wie horny du gerade bist (1–10).",
+                        "Setz dich für 20 Sekunden auf den Schoß von jemandem und bleib ganz cool dabei.",
+                        "Gib jemandem ein Kompliment, das so freaky und direkt ist, dass es peinlich wird.",
+                        "Dreh dich um und schüttle deinen Arsch für 10 Sekunden so, als wärst du auf einer Stage.",
+                        "Lass jemanden dir für 15 Sekunden die Haare leicht ziehen, während du lachst.",
+                        "Sag laut einen richtig dreckigen Satz und schau dabei jemandem tief in die Augen.",
+                        "Mach die heißeste Selfie-Pose, die du kannst, und zeig sie der Gruppe.",
+                        "Lass dir von der Gruppe eine Zahl zwischen 1 und 10 geben – so horny musst du jetzt so tun.",
+                        "Kriech auf allen Vieren zwei Meter zu jemandem und sag etwas Freaky.",
+                        "Nimm jemandem die Hand und fahr langsam mit dem Finger über den Handrücken, während du etwas Dirty sagst.",
+                        "Stell dich in den Türrahmen und mach 15 Sekunden lang eine übertriebene, sexy Pose.",
+                        "Erzähl der Gruppe in einem Satz deine aktuell freakigste Fantasy – ohne Details, die zu weit gehen.",
+                        "Lass jemanden entscheiden, ob du ein Kleidungsstück lockerer machen oder eine sexy Grimasse ziehen musst.",
+                        "Mach 20 Sekunden lang so, als wärst du total horny und könntest dich kaum zurückhalten – aber bleib angezogen."
+                ],
+                "penalties": [
+                        "Du musst die nächste Runde mit einer richtig horny Gesichtsausdruck spielen.",
+                        "Du musst 1 Minute lang in der Ecke stehen und so tun, als wärst du total needy.",
+                        "Du musst dem Spieler deiner Wahl 20 Sekunden lang die Hand küssen und dabei etwas Freaky flüstern."
+                ]
+        }
+};
+
+      const drinkThemes = {
+        "lustig": [
+                "du schon einmal so getan hast, als würdest du eine Nachricht nicht sehen",
+                "du schon einmal etwas gesucht hast, das direkt vor dir lag",
+                "du schon einmal über deinen eigenen Witz lachen musstest",
+                "du schon einmal jemandem zugewinkt hast, der gar nicht dich meinte",
+                "du schon einmal einen Ohrwurm den ganzen Tag nicht losgeworden bist",
+                "du schon einmal aus Versehen laut mit dir selbst gesprochen hast",
+                "du schon einmal einen Raum betreten und sofort vergessen hast, warum",
+                "du schon einmal etwas gegessen hast, obwohl es auf den Boden gefallen war",
+                "du schon einmal bei einem Film eingeschlafen bist",
+                "du schon einmal einen Text geschrieben und wieder gelöscht hast, ohne ihn abzuschicken",
+                "du schon einmal einen Songtext völlig falsch mitgesungen hast",
+                "du schon einmal versucht hast, eine Tür in die falsche Richtung zu öffnen",
+                "du schon einmal so getan hast, als würdest du telefonieren",
+                "du schon einmal etwas im Kühlschrank gesucht hast, das du gerade in der Hand hattest",
+                "du schon einmal bei einem Spiel die Regeln erst mitten in der Runde verstanden hast",
+                "du schon einmal einen Spitznamen für einen Gegenstand erfunden hast",
+                "du schon einmal einen Tanzschritt geübt hast, wenn niemand zugeschaut hat",
+                "du schon einmal eine Sprachnachricht neu aufgenommen hast, weil sie dir komisch vorkam",
+                "du schon einmal über etwas gelacht hast, obwohl du den Witz nicht verstanden hast",
+                "du schon einmal aus Versehen die falsche Person angeschrieben hast"
+        ],
+        "freaky": [
+                "du schon einmal bei einem Date besonders nervös warst",
+                "du schon einmal heimlich für jemanden geschwärmt hast",
+                "du schon einmal eine Nachricht mehrfach überarbeitet hast, bevor du sie abgeschickt hast",
+                "du schon einmal bei einem Kompliment verlegen geworden bist",
+                "du schon einmal einen Flirt erst viel später bemerkt hast",
+                "du schon einmal extra lange gebraucht hast, um auf eine Nachricht zu antworten",
+                "du schon einmal vor einem Treffen dein Outfit gewechselt hast",
+                "du schon einmal jemanden wegen eines Lächelns sympathisch fandest",
+                "du schon einmal einen romantischen Film nur wegen einer bestimmten Person geschaut hast",
+                "du schon einmal so getan hast, als wärst du bei einem Treffen ganz entspannt",
+                "du schon einmal ein Kompliment bekommen hast, an das du dich heute noch erinnerst",
+                "du schon einmal gehofft hast, dass eine bestimmte Person dir schreibt",
+                "du schon einmal bei einem Date über etwas völlig Unwichtiges gelacht hast",
+                "du schon einmal einen Song mit einer bestimmten Person verbunden hast",
+                "du schon einmal einen ersten Schritt machen wolltest, dich dann aber nicht getraut hast",
+                "du schon einmal ein Treffen im Kopf vorher durchgespielt hast",
+                "du schon einmal jemanden wegen seines Humors besonders attraktiv fandest",
+                "du schon einmal einen Blickkontakt länger gehalten hast als geplant",
+                "du schon einmal eine Nachricht gelesen und sofort deinen Freunden davon erzählt hast",
+                "du schon einmal von einem unerwartet schönen Date überrascht wurdest"
+        ],
+        "deep": [
+                "du schon einmal an einem schwierigen Tag so getan hast, als wäre alles in Ordnung",
+                "du schon einmal einen Rat bekommen hast, der dir wirklich geholfen hat",
+                "du schon einmal eine Entscheidung getroffen hast, vor der du zuerst Angst hattest",
+                "du schon einmal jemandem für etwas gedankt hast, das lange zurückliegt",
+                "du schon einmal deine Meinung über eine Person komplett geändert hast",
+                "du schon einmal etwas vermisst hast, von dem du dachtest, es wäre dir nicht wichtig",
+                "du schon einmal einen wichtigen Moment erst im Nachhinein richtig geschätzt hast",
+                "du schon einmal jemandem verziehen hast, obwohl es nicht leicht war",
+                "du schon einmal etwas Neues ausprobiert hast, obwohl du unsicher warst",
+                "du schon einmal durch ein Gespräch eine andere Sicht auf die Dinge bekommen hast",
+                "du schon einmal stolz auf dich warst, es aber niemandem erzählt hast",
+                "du schon einmal eine Freundschaft wieder aufgenommen hast",
+                "du schon einmal deine Meinung geändert hast, nachdem du jemandem zugehört hast",
+                "du schon einmal in einem unerwarteten Moment besonders dankbar warst",
+                "du schon einmal einen Traum aufgeschoben hast, den du noch verwirklichen möchtest",
+                "du schon einmal jemandem geholfen hast, ohne dafür Anerkennung zu erwarten",
+                "du schon einmal aus einem Fehler etwas Wichtiges gelernt hast",
+                "du schon einmal einen Ort besucht hast, an den du gern zurückkehren würdest",
+                "du schon einmal bemerkt hast, dass du dich persönlich verändert hast",
+                "du schon einmal etwas sagen wolltest, es dann aber doch für dich behalten hast"
+        ]
+};
+
+      const wweThemes = {
+        "lustig": [
+                "Wer würde eher über den eigenen Witz lachen, bevor er ihn zu Ende erzählt?",
+                "Wer würde eher beim Karaoke den Songtext komplett falsch mitsingen?",
+                "Wer würde eher im Urlaub den Weg verlieren, obwohl die Karte offen ist?",
+                "Wer würde eher eine Pflanze versehentlich vertrocknen lassen?",
+                "Wer würde eher einen ganzen Tag im Schlafanzug verbringen?",
+                "Wer würde eher beim Film als Erstes einschlafen?",
+                "Wer würde eher einen peinlichen Ohrwurm laut vorsingen?",
+                "Wer würde eher mit einem Haustier ein richtiges Gespräch führen?",
+                "Wer würde eher beim Tanzen die ungewöhnlichsten Moves zeigen?",
+                "Wer würde eher einen Gegenstand verlegen, den die Person gerade noch in der Hand hatte?",
+                "Wer würde eher aus Versehen eine Nachricht an die falsche Gruppe schicken?",
+                "Wer würde eher bei einem Brettspiel die Regeln erfinden?",
+                "Wer würde eher eine spontane Weltreise buchen?",
+                "Wer würde eher beim Kochen das Rezept ignorieren und improvisieren?",
+                "Wer würde eher in einer Quizshow mit einer völlig absurden Antwort gewinnen?",
+                "Wer würde eher über einen harmlosen Witz am längsten lachen?",
+                "Wer würde eher einen lustigen Spitznamen für ein Küchengerät erfinden?",
+                "Wer würde eher bei einem Regentag freiwillig nach draußen gehen?",
+                "Wer würde eher ein völlig unnötiges Gadget kaufen?",
+                "Wer würde eher aus einem kleinen Missgeschick eine lange Geschichte machen?"
+        ],
+        "freaky": [
+                "Wer würde eher bei einem Date den ersten Schritt machen?",
+                "Wer würde eher einen heimlichen Crush am längsten geheim halten?",
+                "Wer würde eher eine romantische Nachricht mehrfach überarbeiten?",
+                "Wer würde eher bei einem Kompliment sofort rot werden?",
+                "Wer würde eher einen Flirt erst viel später bemerken?",
+                "Wer würde eher ein Date bis ins kleinste Detail planen?",
+                "Wer würde eher spontan zu einem romantischen Ausflug aufbrechen?",
+                "Wer würde eher jemanden wegen des Humors sympathisch finden?",
+                "Wer würde eher einen Liebesfilm heimlich auswendig kennen?",
+                "Wer würde eher einen Song mit einer besonderen Person verbinden?",
+                "Wer würde eher bei einem ersten Date besonders nervös sein?",
+                "Wer würde eher eine süße Überraschung vorbereiten?",
+                "Wer würde eher beim Kennenlernen zuerst nach gemeinsamen Interessen fragen?",
+                "Wer würde eher eine charmante Nachricht als Erstes schicken?",
+                "Wer würde eher ein Date an einem ungewöhnlichen Ort vorschlagen?",
+                "Wer würde eher nach einem schönen Date noch lange daran denken?",
+                "Wer würde eher eine romantische Geste spontan statt geplant machen?",
+                "Wer würde eher beim Flirten den eigenen Faden verlieren?",
+                "Wer würde eher jemanden mit einem selbstgemachten Geschenk überraschen?",
+                "Wer würde eher eine Liebeskomödie für den perfekten Filmabend auswählen?"
+        ],
+        "deep": [
+                "Wer würde eher einen großen Traum trotz aller Zweifel verfolgen?",
+                "Wer würde eher einem Freund mitten in der Nacht zuhören?",
+                "Wer würde eher einen Fehler offen zugeben?",
+                "Wer würde eher für eine wichtige Sache alles stehen und liegen lassen?",
+                "Wer würde eher einen Rat geben, der wirklich weiterhilft?",
+                "Wer würde eher sich für eine neue Erfahrung aus der Komfortzone wagen?",
+                "Wer würde eher eine alte Freundschaft wieder aufnehmen?",
+                "Wer würde eher sich an kleine Details erinnern, die andere erzählen?",
+                "Wer würde eher einen Streit als Erstes beilegen?",
+                "Wer würde eher einen ganz neuen Lebensweg einschlagen?",
+                "Wer würde eher für andere einstehen, auch wenn es schwierig wird?",
+                "Wer würde eher eine wichtige Entscheidung nach dem Bauchgefühl treffen?",
+                "Wer würde eher anderen Mut machen, etwas Neues zu versuchen?",
+                "Wer würde eher die eigene Meinung nach einem guten Gespräch ändern?",
+                "Wer würde eher einen freien Tag nutzen, um jemandem zu helfen?",
+                "Wer würde eher einen bedeutsamen Moment in einem Tagebuch festhalten?",
+                "Wer würde eher bei einer schwierigen Aufgabe geduldig bleiben?",
+                "Wer würde eher sich bei jemandem für etwas von früher bedanken?",
+                "Wer würde eher aus einer Niederlage etwas Wichtiges lernen?",
+                "Wer würde eher anderen zeigen, wie sehr sie geschätzt werden?"
+        ]
+};
+
+      const defaultSettings = {
+        wop: {
+          truthLimit: true,
+          dareRounds: "off",
+          refusalPenalty: true,
+          categories: Object.keys(wopThemes)
+        },
+        wwe: { categories: Object.keys(wweThemes) },
+        drink: { categories: Object.keys(drinkThemes) }
+      };
+      const savedSettings = JSON.parse(JSON.stringify(defaultSettings));
+
+      const app = document.querySelector("#app");
+      const backButton = document.querySelector("#back-button");
+      const headerPlayers = document.querySelector("#header-players");
+      const views = new Map(Array.from(document.querySelectorAll("[data-view]"), (view) => [view.dataset.view, view]));
+      const state = {
+        view: "home",
+        players: [],
+        game: null,
+        settings: null,
+        playerIndex: 0,
+        firstPlayerIndex: 0,
+        round: 1,
+        truthStreaks: [],
+        randomDareRound: false,
+        activePromptType: null,
+        isPenalty: false,
+        pools: null,
+        unused: new Map(),
+        lastCard: null
+      };
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[character]);
+      }
+
+      function chooseRandom(items) {
+        return items[Math.floor(Math.random() * items.length)];
+      }
+
+      function showView(name) {
+        state.view = name;
+        for (const [viewName, element] of views) {
+          element.classList.toggle("is-active", viewName === name);
+        }
+        backButton.hidden = name === "home";
+        headerPlayers.hidden = !["hub", "game"].includes(name);
+        renderHeaderPlayers();
+        document.querySelector("#footer-note").hidden = name === "game";
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+
+      function renderHeaderPlayers() {
+        headerPlayers.replaceChildren();
+        if (state.view === "home" || state.view === "players") {
+          return;
+        }
+        state.players.forEach((name, index) => {
+          const badge = document.createElement("li");
+          badge.className = `player-badge${state.view === "game" && state.game === "wop" && index === state.playerIndex ? " is-active" : ""}`;
+          badge.title = name;
+          badge.setAttribute("aria-label", `${name}${state.view === "game" && state.game === "wop" && index === state.playerIndex ? ", am Zug" : ""}`);
+          badge.textContent = Array.from(name).slice(0, 2).join("").toLocaleUpperCase("de");
+          headerPlayers.append(badge);
+        });
+      }
+
+      function renderPlayers() {
+        const list = document.querySelector("#player-list");
+        list.replaceChildren();
+        state.players.forEach((name, index) => {
+          const item = document.createElement("li");
+          item.className = "player-item";
+          const text = document.createElement("span");
+          text.textContent = name;
+          const remove = document.createElement("button");
+          remove.className = "danger-button";
+          remove.type = "button";
+          remove.dataset.action = "remove-player";
+          remove.dataset.index = String(index);
+          remove.setAttribute("aria-label", `${name} entfernen`);
+          remove.textContent = "×";
+          item.append(text, remove);
+          list.append(item);
+        });
+        const count = state.players.length;
+        document.querySelector("#player-count").textContent = count === 0
+          ? "Noch keine Spieler hinzugefügt"
+          : `${count} Spieler hinzugefügt`;
+        document.querySelector("#players-continue").hidden = count < 2;
+      }
+
+      function beginPlayers() {
+        renderPlayers();
+        showView("players");
+        document.querySelector("#player-name").focus();
+      }
+
+      function beginHub() {
+        if (state.players.length < 2) {
+          beginPlayers();
+          return;
+        }
+        showView("hub");
+      }
+
+      function gameInfo(game) {
+        if (game === "wop") {
+          return {
+            title: "Wahrheit <span>oder</span> Pflicht",
+            description: "Legt fest, wie eure Runde ablaufen soll.",
+            categories: Object.keys(wopThemes)
+          };
+        }
+        if (game === "wwe") {
+          return {
+            title: "Wer würde <span>eher?</span>",
+            description: "Wählt die Kategorien für eure Runde aus.",
+            categories: Object.keys(wweThemes)
+          };
+        }
+        return {
+          title: "Trink-<span>Spiel</span>",
+          description: "Wählt die Themen für eure Runde aus.",
+          categories: Object.keys(drinkThemes)
+        };
+      }
+
+      function readSavedSettings(game) {
+        return JSON.parse(JSON.stringify(savedSettings[game]));
+      }
+
+      function renderSettings(game) {
+        state.game = game;
+        const info = gameInfo(game);
+        const saved = readSavedSettings(game);
+        document.querySelector("#settings-title").innerHTML = info.title;
+        document.querySelector("#settings-description").textContent = info.description;
+        const categoriesMarkup = info.categories.map((category) => `
+          <label class="topic-option">
+            <input type="checkbox" name="categories" value="${escapeHtml(category)}" ${saved.categories.includes(category) ? "checked" : ""}>
+            <span>${escapeHtml(categoryNames[category])}</span>
+          </label>
+        `).join("");
+        const wopSettings = game === "wop" ? `
+          <section class="settings-section" aria-labelledby="rules-heading">
+            <h2 class="section-heading" id="rules-heading">Regeln</h2>
+            <div class="setting-row">
+              <div class="setting-copy">
+                <span class="setting-title">2-Wahrheiten-Limit</span>
+                <span class="setting-description">Nach zwei Wahrheiten muss die Person beim nächsten Zug Pflicht wählen.</span>
+              </div>
+              <label class="switch" aria-label="2-Wahrheiten-Limit">
+                <input type="checkbox" name="truthLimit" ${saved.truthLimit ? "checked" : ""}>
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-copy">
+                <span class="setting-title">Pflichtrunden</span>
+                <span class="setting-description">Eine Runde, in der nur Pflicht gewählt werden darf.</span>
+              </div>
+              <select class="setting-select" name="dareRounds" aria-label="Pflichtrunden">
+                <option value="random" ${saved.dareRounds === "random" ? "selected" : ""}>Zufällig</option>
+                <option value="every-five" ${saved.dareRounds === "every-five" ? "selected" : ""}>Alle 5 Runden</option>
+                <option value="off" ${saved.dareRounds === "off" ? "selected" : ""}>Aus</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-copy">
+                <span class="setting-title">Strafe bei Verweigerung</span>
+                <span class="setting-description">Bei Verweigerung kann eine freiwillige Zusatz-Wahrheit gewählt werden.</span>
+              </div>
+              <label class="switch" aria-label="Strafe bei Verweigerung">
+                <input type="checkbox" name="refusalPenalty" ${saved.refusalPenalty ? "checked" : ""}>
+                <span class="switch-track" aria-hidden="true"></span>
+              </label>
+            </div>
+          </section>
+        ` : "";
+        document.querySelector("#settings-form").innerHTML = `
+          ${wopSettings}
+          <section class="settings-section" aria-labelledby="categories-heading">
+            <h2 class="section-heading" id="categories-heading">${game === "wop" ? "Themen" : "Kategorien"}</h2>
+            <div class="topic-grid">${categoriesMarkup}</div>
+          </section>
+        `;
+        document.querySelector("#settings-error").textContent = "";
+        showView("settings");
+      }
+
+      function saveGameSettings() {
+        const form = document.querySelector("#settings-form");
+        const categories = Array.from(form.querySelectorAll('input[name="categories"]:checked'), (input) => input.value);
+        if (categories.length === 0) {
+          document.querySelector("#settings-error").textContent = "Wählt bitte mindestens eine Kategorie aus.";
+          return null;
+        }
+        const settings = { categories };
+        if (state.game === "wop") {
+          settings.truthLimit = form.elements.truthLimit.checked;
+          settings.dareRounds = form.elements.dareRounds.value;
+          settings.refusalPenalty = form.elements.refusalPenalty.checked;
+        }
+        savedSettings[state.game] = settings;
+        return settings;
+      }
+
+      function makePool(game, categories) {
+        if (game === "wop") {
+          return {
+            truths: categories.flatMap((category) => wopThemes[category].truths.map((text) => ({ category, text }))),
+            dares: categories.flatMap((category) => wopThemes[category].dares.map((text) => ({ category, text }))),
+            penalties: categories.flatMap((category) => wopThemes[category].penalties.map((text) => ({ category, text })))
+          };
+        }
+        const themeData = game === "drink" ? drinkThemes : wweThemes;
+        return categories.flatMap((category) => themeData[category].map((text) => ({ category, text })));
+      }
+
+      function beginGame() {
+        const settings = saveGameSettings();
+        if (settings === null) {
+          return;
+        }
+        state.settings = settings;
+        state.round = 1;
+        state.playerIndex = Math.floor(Math.random() * Math.max(state.players.length, 1));
+        state.firstPlayerIndex = state.playerIndex;
+        state.truthStreaks = state.players.map(() => 0);
+        state.randomDareRound = state.game === "wop" && settings.dareRounds === "random" && Math.random() < 0.2;
+        state.activePromptType = null;
+        state.isPenalty = false;
+        state.unused = state.game === "wop" ? new Map() : new Set();
+        state.lastCard = null;
+        state.pools = makePool(state.game, settings.categories);
+        showView("game");
+        if (state.game === "wop") {
+          renderWopTurn();
+        } else {
+          renderPromptGame();
+        }
+      }
+
+      function currentPlayer() {
+        return state.players[state.playerIndex];
+      }
+
+      function hasDareOnlyTurn() {
+        return (state.settings.dareRounds === "every-five" && state.round % 5 === 0)
+          || state.randomDareRound
+          || (state.settings.truthLimit && state.truthStreaks[state.playerIndex] >= 2);
+      }
+
+      function renderMeta(title, withPlayer) {
+        const meta = document.querySelector("#game-meta");
+        if (withPlayer) {
+          meta.innerHTML = `
+            <div>
+              <div class="round-label">Runde ${state.round}</div>
+              <div class="active-player">${escapeHtml(currentPlayer())}</div>
+            </div>
+            <div class="game-kind">${title}</div>
+          `;
+          return;
+        }
+        meta.innerHTML = `<div class="round-label">${escapeHtml(title)}</div>`;
+      }
+
+      function updateHeaderTurn() {
+        renderHeaderPlayers();
+      }
+
+      function setCard(category, badge, text, playerName = "") {
+        document.querySelector("#category-label").textContent = categoryNames[category] || category;
+        document.querySelector("#card-badge").textContent = badge;
+        document.querySelector("#card-player").textContent = playerName;
+        document.querySelector("#card-prompt").textContent = text;
+      }
+
+      function drawWopPrompt(type) {
+        const key = type === "truth" ? "truths" : type === "dare" ? "dares" : "penalties";
+        const pool = state.pools[key];
+        if (pool.length === 0) {
+          throw new Error("Für diese Auswahl gibt es keine passenden Karten.");
+        }
+        const used = state.unused.get(key) || new Set();
+        let available = pool.filter((item) => !used.has(item));
+        if (!available.length) {
+          used.clear();
+          available = pool;
+        }
+        const item = chooseRandom(available);
+        used.add(item);
+        state.unused.set(key, used);
+        const others = state.players.filter((name, index) => index !== state.playerIndex);
+        const randomPlayer = chooseRandom(others.length ? others : state.players);
+        return {
+          category: item.category,
+          text: item.text.replaceAll("{{randomPlayer}}", randomPlayer)
+        };
+      }
+
+      function highlightedPrompt(text) {
+        const names = [...state.players].sort((a, b) => b.length - a.length);
+        if (!names.length) {
+          return escapeHtml(text);
+        }
+        const pattern = new RegExp(`(${names.map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+        const canonical = new Map(names.map((name) => [name.toLocaleLowerCase("de"), name]));
+        return text.split(pattern).map((part) => {
+          const name = canonical.get(part.toLocaleLowerCase("de"));
+          return name ? `<span class="prompt-player-name">${escapeHtml(part)}</span>` : escapeHtml(part);
+        }).join("");
+      }
+
+      function renderWopTurn() {
+        const forcedDare = hasDareOnlyTurn();
+        renderMeta("Wahrheit oder Pflicht", true);
+        updateHeaderTurn();
+        document.querySelector("#main-card").classList.toggle("is-dare", forcedDare);
+        setCard(
+          state.settings.categories.length === 1 ? state.settings.categories[0] : "Wählt",
+          "Wahrheit oder Pflicht",
+          "Wähle Wahrheit oder Pflicht.",
+          currentPlayer()
+        );
+        document.querySelector("#card-prompt").innerHTML = "Wähle Wahrheit oder Pflicht.";
+        const label = forcedDare
+          ? state.settings.truthLimit && state.truthStreaks[state.playerIndex] >= 2
+            ? "Du hast zu oft Wahrheit gewählt"
+            : "Pflicht-Runde"
+          : "Was soll die Person machen?";
+        document.querySelector("#turn-note").textContent = forcedDare
+          ? `${label} – in diesem Zug ist nur Pflicht möglich.`
+          : "";
+        document.querySelector("#card-actions").innerHTML = `
+          <div class="chooser">${escapeHtml(label)}</div>
+          <div class="button-row">
+            <button class="secondary-button" type="button" data-action="wop-pick" data-type="truth" ${forcedDare ? "disabled" : ""}>Wahrheit</button>
+            <button class="primary-button" type="button" data-action="wop-pick" data-type="dare">Pflicht</button>
+          </div>
+        `;
+      }
+
+      function displayWopPrompt(type, penalty = false) {
+        state.activePromptType = type;
+        state.isPenalty = penalty;
+        const prompt = drawWopPrompt(penalty ? "penalty" : type);
+        renderMeta("Wahrheit oder Pflicht", true);
+        updateHeaderTurn();
+        document.querySelector("#main-card").classList.toggle("is-dare", type === "dare");
+        setCard(prompt.category, penalty ? "Verweigerungs-Strafe" : type === "truth" ? "Wahrheit" : "Pflicht", "");
+        document.querySelector("#card-prompt").innerHTML = highlightedPrompt(prompt.text);
+        document.querySelector("#turn-note").textContent = penalty ? "Diese Zusatzfrage ist freiwillig. Mit „Weiter“ geht es zur nächsten Person." : "";
+        document.querySelector("#card-actions").innerHTML = `
+          <div class="button-row">
+            ${penalty ? "" : '<button class="quiet-button" type="button" data-action="refuse">Verweigern</button>'}
+            <button class="primary-button" type="button" data-action="next-turn">Nächste Karte →</button>
+          </div>
+        `;
+      }
+
+      function nextWopTurn() {
+        if (!state.isPenalty && state.activePromptType === "truth") {
+          state.truthStreaks[state.playerIndex] += 1;
+        } else if (!state.isPenalty && state.activePromptType === "dare") {
+          state.truthStreaks[state.playerIndex] = 0;
+        }
+        state.playerIndex = (state.playerIndex + 1) % state.players.length;
+        if (state.playerIndex === state.firstPlayerIndex) {
+          state.round += 1;
+          state.randomDareRound = state.settings.dareRounds === "random" && Math.random() < 0.2;
+        }
+        state.activePromptType = null;
+        state.isPenalty = false;
+        renderWopTurn();
+      }
+
+      function drawFromPool() {
+        const pool = state.pools;
+        if (!pool.length) {
+          throw new Error("Für diese Auswahl gibt es keine Aussagen.");
+        }
+        let available = pool.filter((item) => !state.unused.has(item));
+        if (!available.length) {
+          state.unused.clear();
+          available = pool.filter((item) => item !== state.lastCard);
+          if (!available.length) {
+            available = pool;
+          }
+        }
+        const item = chooseRandom(available);
+        state.unused.add(item);
+        state.lastCard = item;
+        return item;
+      }
+
+      function renderPromptGame() {
+        renderMeta(state.game === "drink" ? "Trink-Spiel" : "Wer würde eher?", false);
+        const item = drawFromPool();
+        setCard(item.category, state.game === "drink" ? "Trink wenn" : "Wer würde eher?", item.text);
+        document.querySelector("#main-card").classList.remove("is-dare");
+        document.querySelector("#turn-note").textContent = state.game === "drink"
+          ? "Trinken ist freiwillig: Wasser, alkoholfrei oder überspringen ist immer okay."
+          : "";
+        document.querySelector("#card-actions").innerHTML = `
+          <div class="single-action">
+            <button class="primary-button" type="button" data-action="next-prompt">Nächste ${state.game === "drink" ? "Aussage" : "Aussage"}</button>
+          </div>
+        `;
+      }
+
+      function goBack() {
+        if (state.view === "players") {
+          showView("home");
+        } else if (state.view === "hub") {
+          showView("players");
+        } else if (state.view === "settings") {
+          showView("hub");
+        } else if (state.view === "game") {
+          renderSettings(state.game);
+        }
+      }
+
+      document.querySelector("#player-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#player-name");
+        const name = input.value.trim();
+        if (!name) {
+          input.focus();
+          return;
+        }
+        state.players.push(name);
+        input.value = "";
+        renderPlayers();
+        input.focus();
+      });
+
+      document.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-action]");
+        if (!button || button.disabled) {
+          return;
+        }
+        const action = button.dataset.action;
+        if (action === "start") {
+          beginPlayers();
+        } else if (action === "hub") {
+          beginHub();
+        } else if (action === "settings") {
+          if (state.players.length < 2) {
+            beginPlayers();
+            document.querySelector("#player-count").textContent = "Fügt mindestens zwei Spieler hinzu, bevor ihr startet.";
+            return;
+          }
+          renderSettings(button.dataset.game);
+        } else if (action === "remove-player") {
+          state.players.splice(Number(button.dataset.index), 1);
+          renderPlayers();
+        } else if (action === "begin-game") {
+          beginGame();
+        } else if (action === "wop-pick") {
+          displayWopPrompt(button.dataset.type);
+        } else if (action === "next-turn") {
+          nextWopTurn();
+        } else if (action === "refuse") {
+          if (state.settings.refusalPenalty) {
+            displayWopPrompt("truth", true);
+          } else {
+            nextWopTurn();
+          }
+        } else if (action === "next-prompt") {
+          renderPromptGame();
+        } else if (action === "back") {
+          goBack();
+        } else if (action === "home") {
+          showView("home");
+        }
+      });
+
+      showView("home");
+    })();
+  </script>
+</body>
+</html>
